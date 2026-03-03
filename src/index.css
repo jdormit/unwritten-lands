@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  /* Parchment earth-tone palette */
+  --color-parchment-50: #faf6f0;
+  --color-parchment-100: #f3ebe0;
+  --color-parchment-200: #e8d9c0;
+  --color-parchment-300: #d4be96;
+  --color-parchment-400: #c2a06c;
+  --color-parchment-500: #b08a50;
+  --color-parchment-600: #9a7444;
+  --color-parchment-700: #7d5c39;
+  --color-parchment-800: #674b33;
+  --color-parchment-900: #553e2d;
+  --color-parchment-950: #2e2017;
+
+  /* Accent colors */
+  --color-ember: #b85c38;
+  --color-ember-dark: #8b3a1d;
+  --color-forest: #4a6741;
+  --color-forest-dark: #2f4429;
+  --color-sky: #5b7fa5;
+  --color-sky-dark: #3d5a7a;
+  --color-gold: #c4973b;
+  --color-gold-dark: #9a7528;
+  --color-blood: #8b2e2e;
+  --color-blood-dark: #6b1f1f;
+
+  /* Resource colors */
+  --color-resource-people: #c4973b;
+  --color-resource-wealth: #4a6741;
+  --color-resource-magic: #6b5ba5;
+  --color-resource-reputation: #5b7fa5;
+
+  /* Fonts */
+  --font-serif: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Base styles */
+body {
+  @apply bg-parchment-100 text-parchment-950 font-serif;
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Narrative text styling */
+.narrative-text {
+  @apply text-lg leading-relaxed text-parchment-900;
+}
+
+/* Advisor speech styling */
+.advisor-speech {
+  @apply italic text-parchment-800;
+}
+
+/* Resource bar animations */
+.resource-bar-fill {
+  transition: width 0.8s ease-in-out;
+}
+
+/* Resource change indicator */
+.resource-change {
+  animation: fadeUpOut 1.5s ease-out forwards;
+}
+
+@keyframes fadeUpOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Loading shimmer */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-parchment-200) 25%,
+    var(--color-parchment-100) 50%,
+    var(--color-parchment-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Parchment card */
+.parchment-card {
+  @apply bg-parchment-50 border border-parchment-300 rounded-lg shadow-sm;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-parchment-200;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-parchment-400 rounded;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-parchment-500;
+}
