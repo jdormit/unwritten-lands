@@ -23,7 +23,7 @@ export function ResourceBar({ resource, value, previousValue }: ResourceBarProps
   useEffect(() => {
     if (changeAmount !== 0) {
       setShowChange(true);
-      timeoutRef.current = setTimeout(() => setShowChange(false), 1500);
+      timeoutRef.current = setTimeout(() => setShowChange(false), 4000);
       return () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
       };

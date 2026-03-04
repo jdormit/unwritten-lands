@@ -1,20 +1,23 @@
 import type { Resources, Season, ResourceKey } from "../types/game";
 import { ResourceBarGroup } from "./ResourceBar";
 
+type DisplaySeason = Season | "sacred_time";
+
 interface GameHeaderProps {
   clanName: string;
   year: number;
-  season: Season;
+  season: DisplaySeason;
   resources: Resources;
   previousResources?: Resources;
   onOpenLore?: () => void;
 }
 
-const SEASON_DISPLAY: Record<Season, string> = {
+const SEASON_DISPLAY: Record<DisplaySeason, string> = {
   spring: "Spring",
   summer: "Summer",
   autumn: "Autumn",
   winter: "Winter",
+  sacred_time: "Sacred Time",
 };
 
 export function GameHeader({
@@ -38,12 +41,13 @@ export function GameHeader({
           {onOpenLore && (
             <button
               onClick={onOpenLore}
-              className="text-sm font-sans text-parchment-500 hover:text-parchment-800
-                transition-colors cursor-pointer"
-              title="Clan Lore"
-              aria-label="Open clan lore"
+              className="text-sm font-sans text-parchment-700 hover:text-parchment-900
+                bg-parchment-100 hover:bg-parchment-200 border border-parchment-300
+                rounded px-2 py-1 transition-colors cursor-pointer"
+              title="Chronicle & Lore"
+              aria-label="Open chronicle and lore"
             >
-              &#x1F4DC;
+              &#x1F4DC; Lore
             </button>
           )}
         </div>

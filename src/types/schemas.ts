@@ -99,6 +99,7 @@ export const directorOutputSchema = z.object({
 
 // Narrator Output Schema
 export const narratorOutputSchema = z.object({
+  event_title: z.string().describe("A short, evocative title for this event (2-5 words), e.g. 'Riders at the Gate', 'The Harvest Quarrel', 'A Debt Recalled'"),
   event_narrative: z.string().describe("2-4 sentences describing the situation"),
   advisor_opinions: z.array(z.object({
     advisor_name: z.string(),
@@ -119,4 +120,11 @@ export const epilogueOutputSchema = z.object({
   saga_title: z.string(),
   saga_text: z.string().describe("A narrative summary of the clan's entire story, 3-6 paragraphs"),
   outcome: z.enum(["triumph", "survival", "pyrrhic_victory", "defeat", "collapse"]),
+});
+
+// Consequence Output Schema
+export const consequenceOutputSchema = z.object({
+  consequence_narrative: z.string().describe("2-3 sentences describing the immediate aftermath of the player's choice, written in saga-like prose. Concrete and vivid, not abstract."),
+  continue_text: z.string().describe("A short, atmospheric phrase for the continue button (3-6 words). Should feel in-world and contextual to the season and situation, e.g. 'The season turns...', 'Dawn breaks over the valley...', 'Your warriors return...'. NEVER generic UI text like 'Continue' or 'Next'."),
+  chronicle_entry: z.string().describe("A concise 1-2 sentence summary of the event and the clan's decision, written as a saga historian would record it for the chronicle. Focus on what happened and why it mattered. Example: 'When the Elk Clan demanded tribute, the clan refused and sent warriors to guard the pass. The Elk retreated, but their grudge only deepened.'"),
 });

@@ -3,9 +3,10 @@ import type { Auth } from "ai-sdk-codex-oauth";
 import { generateSacredTime } from "../llm/calls";
 import { useGame } from "../state/game-context";
 import { LoadingState } from "../components/LoadingState";
-import { ResourceBarGroup } from "../components/ResourceBar";
+import { GameHeader } from "../components/GameHeader";
 import { EventNarrative } from "../components/EventNarrative";
-import type { MagicAllocation, ResourceKey } from "../types/game";
+import { WorldSidebar } from "../components/WorldSidebar";
+import type { MagicAllocation } from "../types/game";
 
 interface SacredTimeScreenProps {
   auth: Auth;
@@ -20,6 +21,7 @@ export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
     harvest: 1,
     diplomacy: 1,
   });
+  const [loreOpen, setLoreOpen] = useState(false);
   const generationTriggered = useRef(false);
   const cancelledRef = useRef(false);
 
@@ -79,8 +81,31 @@ export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-4">
-        <LoadingState message="The stars align for Sacred Time..." />
+      <div className="min-h-dvh flex flex-col px-4 py-4 gap-4">
+        {state.world && (
+          <>
+            <GameHeader
+              clanName={state.world.clan.name}
+              year={state.current_year}
+              season="sacred_time"
+              resources={state.resources}
+              onOpenLore={() => setLoreOpen(true)}
+            />
+            <WorldSidebar
+              isOpen={loreOpen}
+              onClose={() => setLoreOpen(false)}
+              world={state.world}
+              relationships={state.clan_relationships}
+              flags={state.flags}
+              storylines={state.active_storylines}
+              eventHistory={state.event_history}
+              clanName={state.world.clan.name}
+            />
+          </>
+        )}
+        <div className="flex-1 flex items-center justify-center">
+          <LoadingState message="The stars align for Sacred Time..." />
+        </div>
       </div>
     );
   }
@@ -109,22 +134,33 @@ export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
   const sacred = state.sacred_time!;
 
   return (
-    <div className="min-h-dvh flex flex-col items-center px-4 py-8">
-      <div className="w-full max-w-2xl space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-parchment-900">
-            Sacred Time
-          </h2>
-          <p className="text-parchment-600 font-sans">
-            Year {state.current_year} of the {state.world?.clan.name ?? "Clan"}
-          </p>
-        </div>
+    <div className="min-h-dvh flex flex-col px-4 py-4 gap-4">
+      <GameHeader
+        clanName={state.world?.clan.name ?? "Clan"}
+        year={state.current_year}
+        season="sacred_time"
+        resources={state.resources}
+        onOpenLore={() => setLoreOpen(true)}
+      />
 
-        {/* Resources Overview */}
-        <div className="parchment-card px-6 py-4">
-          <ResourceBarGroup resources={state.resources as Record<ResourceKey, number>} />
-        </div>
+      {state.world && (
+        <WorldSidebar
+          isOpen={loreOpen}
+          onClose={() => setLoreOpen(false)}
+          world={state.world}
+          relationships={state.clan_relationships}
+          flags={state.flags}
+          storylines={state.active_storylines}
+          eventHistory={state.event_history}
+          clanName={state.world.clan.name}
+        />
+      )}
+
+      <div className="flex-1 w-full max-w-2xl mx-auto space-y-5">
+        {/* Screen Title */}
+        <h2 className="text-3xl font-bold text-parchment-900 text-center">
+          Sacred Time
+        </h2>
 
         {/* Year Recap */}
         <div className="parchment-card px-6 py-5 space-y-4">

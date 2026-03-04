@@ -6,6 +6,7 @@ import { TitleScreen } from "./screens/TitleScreen";
 import { WorldGenScreen } from "./screens/WorldGenScreen";
 import { SacredTimeScreen } from "./screens/SacredTimeScreen";
 import { EventScreen } from "./screens/EventScreen";
+import { ConsequenceScreen } from "./screens/ConsequenceScreen";
 import { ActionSelectionScreen } from "./screens/ActionSelectionScreen";
 import { EpilogueScreen } from "./screens/EpilogueScreen";
 import { AuthFlow } from "./components/AuthFlow";
@@ -58,17 +59,6 @@ function App() {
   const handleSkipAction = useCallback(() => {
     dispatch({ type: "ADVANCE_SEASON" });
   }, [dispatch]);
-
-  // Auto-advance from resolved states
-  useEffect(() => {
-    if (state.phase === "event_resolved") {
-      // Show action selection after event
-      dispatch({ type: "SET_PHASE", phase: "action_selection" });
-    } else if (state.phase === "action_resolved") {
-      // Advance to next season after action
-      dispatch({ type: "ADVANCE_SEASON" });
-    }
-  }, [state.phase, dispatch]);
 
   // Auto-save on meaningful state transitions
   useEffect(() => {
@@ -133,12 +123,14 @@ function App() {
       return <EventScreen key={`${state.current_year}-${state.current_season}`} auth={auth} />;
 
     case "event_resolved":
-      // Brief transition state — useEffect will push to action_selection
-      return (
-        <div className="min-h-dvh flex items-center justify-center">
-          <p className="text-parchment-600 italic">The dust settles...</p>
-        </div>
-      );
+      if (!auth) {
+        return (
+          <div className="min-h-dvh flex flex-col items-center justify-center px-4">
+            <AuthFlow onAuthenticated={handleAuthenticated} />
+          </div>
+        );
+      }
+      return <ConsequenceScreen auth={auth} />;
 
     case "action_selection":
       return (
@@ -167,12 +159,14 @@ function App() {
       );
 
     case "action_resolved":
-      // Brief transition state — useEffect will advance season
-      return (
-        <div className="min-h-dvh flex items-center justify-center">
-          <p className="text-parchment-600 italic">The season turns...</p>
-        </div>
-      );
+      if (!auth) {
+        return (
+          <div className="min-h-dvh flex flex-col items-center justify-center px-4">
+            <AuthFlow onAuthenticated={handleAuthenticated} />
+          </div>
+        );
+      }
+      return <ConsequenceScreen auth={auth} />;
 
     case "climax_loading":
     case "climax":

@@ -6,6 +6,8 @@ import type {
   Resources,
   MagicAllocation,
   CurrentEvent,
+  ConsequenceOutput,
+  ChoiceResult,
   SacredTimeOutput,
   EpilogueOutput,
   DirectorOption,
@@ -40,6 +42,8 @@ export const initialGameState: GameState = {
   event_history: [],
   full_history: [],
   current_event: null,
+  last_choice_result: null,
+  consequence: null,
   sacred_time: null,
   epilogue: null,
   last_event_type: null,
@@ -57,6 +61,7 @@ export type GameAction =
   | { type: "SET_MAGIC_ALLOCATION"; allocation: MagicAllocation }
   | { type: "SET_CURRENT_EVENT"; event: CurrentEvent }
   | { type: "APPLY_CHOICE"; optionIndex: number }
+  | { type: "SET_CONSEQUENCE"; consequence: ConsequenceOutput }
   | { type: "ADVANCE_SEASON" }
   | { type: "SET_EPILOGUE"; epilogue: EpilogueOutput }
   | { type: "SET_ERROR"; error: string | null }
@@ -108,8 +113,18 @@ function isResourceDepleted(resources: Resources): boolean {
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
-    case "SET_PHASE":
-      return { ...state, phase: action.phase, error: null };
+    case "SET_PHASE": {
+      const clearConsequence =
+        action.phase === "action_selection" ||
+        action.phase === "event_loading" ||
+        action.phase === "sacred_time";
+      return {
+        ...state,
+        phase: action.phase,
+        error: null,
+        ...(clearConsequence && { last_choice_result: null, consequence: null }),
+      };
+    }
 
     case "INIT_WORLD": {
       const world = action.world;
@@ -237,7 +252,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const historyEntry: HistoryEntry = {
         year: state.current_year,
         season: state.current_season,
-        summary: `${narrator.event_narrative.substring(0, 100)}... Choice: ${narrator.option_texts[action.optionIndex]}`,
+        title: narrator.event_title,
+        chosenOption: narrator.option_texts[action.optionIndex],
+        summary: `${narrator.event_title} — ${narrator.option_texts[action.optionIndex]}`,
       };
 
       const newEventHistory = [
@@ -249,6 +266,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       // Check for resource depletion (game over)
       const depleted = isResourceDepleted(newResources);
+
+      // Capture choice result for the consequence screen
+      const choiceResult: ChoiceResult = {
+        event_title: narrator.event_title,
+        chosen_option_text: narrator.option_texts[action.optionIndex],
+        chosen_option_summary: option.summary,
+        resource_effects: option.resource_effects,
+        relationship_effects: option.relationship_effects ?? null,
+        previous_resources: { ...state.resources },
+        new_resources: newResources,
+        flags_added: option.flags_added ?? null,
+        flags_removed: option.flags_removed ?? null,
+        isPlayerAction,
+      };
 
       return {
         ...state,
@@ -262,11 +293,43 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         full_history: newFullHistory,
         last_event_type: director.event_type,
         current_event: null,
+        last_choice_result: choiceResult,
+        consequence: null,
         phase: depleted
           ? "game_over_loading"
           : isPlayerAction
             ? "action_resolved"
             : "event_resolved",
+      };
+    }
+
+    case "SET_CONSEQUENCE": {
+      // Update the most recent history entry's summary with the LLM-generated chronicle entry
+      const updatedEventHistory = state.event_history.length > 0
+        ? [
+            ...state.event_history.slice(0, -1),
+            {
+              ...state.event_history[state.event_history.length - 1],
+              summary: action.consequence.chronicle_entry,
+            },
+          ]
+        : state.event_history;
+
+      const updatedFullHistory = state.full_history.length > 0
+        ? [
+            ...state.full_history.slice(0, -1),
+            {
+              ...state.full_history[state.full_history.length - 1],
+              summary: action.consequence.chronicle_entry,
+            },
+          ]
+        : state.full_history;
+
+      return {
+        ...state,
+        consequence: action.consequence,
+        event_history: updatedEventHistory,
+        full_history: updatedFullHistory,
       };
     }
 
@@ -277,6 +340,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (yearAdvanced && state.current_year >= 10) {
         return {
           ...state,
+          last_choice_result: null,
+          consequence: null,
           phase: "climax_loading",
         };
       }
@@ -286,6 +351,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state,
           current_season: season,
           current_year: state.current_year + 1,
+          last_choice_result: null,
+          consequence: null,
           phase: "sacred_time",
           sacred_time: null,
         };
@@ -294,6 +361,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         current_season: season,
+        last_choice_result: null,
+        consequence: null,
         phase: "event_loading",
       };
     }
@@ -309,7 +378,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, error: action.error };
 
     case "LOAD_GAME":
-      return { ...action.state };
+      return {
+        ...action.state,
+        last_choice_result: action.state.last_choice_result ?? null,
+        consequence: action.state.consequence ?? null,
+      };
 
     case "RESET":
       return { ...initialGameState };

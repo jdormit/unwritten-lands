@@ -11,7 +11,6 @@ import { GameHeader } from "../components/GameHeader";
 import { EventNarrative } from "../components/EventNarrative";
 import { AdvisorPanel } from "../components/AdvisorPanel";
 import { ChoiceButtons } from "../components/ChoiceButtons";
-import { HistoryLog } from "../components/HistoryLog";
 import { WorldSidebar } from "../components/WorldSidebar";
 import { saveGame } from "../persistence/save";
 import type { Resources } from "../types/game";
@@ -132,6 +131,8 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
               relationships={state.clan_relationships}
               flags={state.flags}
               storylines={state.active_storylines}
+              eventHistory={state.event_history}
+              clanName={state.world.clan.name}
             />
           </>
         )}
@@ -188,10 +189,17 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
         relationships={state.clan_relationships}
         flags={state.flags}
         storylines={state.active_storylines}
+        eventHistory={state.event_history}
+        clanName={state.world.clan.name}
       />
 
       {/* Main content */}
       <div className="flex-1 w-full max-w-2xl mx-auto space-y-5">
+        {/* Event Title */}
+        <h2 className="text-3xl font-bold text-parchment-900 text-center">
+          {event.narrator.event_title}
+        </h2>
+
         {/* Event Narrative */}
         <div className="parchment-card px-6 py-5">
           <EventNarrative text={event.narrator.event_narrative} />
@@ -209,12 +217,6 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
           options={event.director.options}
           onChoose={handleChoice}
           disabled={choosing}
-        />
-
-        {/* History */}
-        <HistoryLog
-          entries={state.event_history}
-          clanName={state.world.clan.name}
         />
       </div>
     </div>

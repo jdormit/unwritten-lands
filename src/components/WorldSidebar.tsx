@@ -4,6 +4,7 @@ import type {
   ClanRelationship,
   ActiveStoryline,
   GameFlag,
+  HistoryEntry,
 } from "../types/game";
 
 interface WorldSidebarProps {
@@ -13,9 +14,11 @@ interface WorldSidebarProps {
   relationships: ClanRelationship[];
   flags: GameFlag[];
   storylines: ActiveStoryline[];
+  eventHistory: HistoryEntry[];
+  clanName?: string;
 }
 
-const RELATIONSHIP_LABELS: Record<number, { label: string; color: string }> = {
+export const RELATIONSHIP_LABELS: Record<number, { label: string; color: string }> = {
   [-3]: { label: "Bitter Enemies", color: "text-blood" },
   [-2]: { label: "Hostile", color: "text-blood" },
   [-1]: { label: "Wary", color: "text-ember" },
@@ -25,12 +28,19 @@ const RELATIONSHIP_LABELS: Record<number, { label: string; color: string }> = {
   [3]: { label: "Sworn Allies", color: "text-forest" },
 };
 
-function getRelationshipDisplay(score: number) {
+export function getRelationshipDisplay(score: number) {
   const clamped = Math.max(-3, Math.min(3, score));
   return RELATIONSHIP_LABELS[clamped] ?? { label: "Unknown", color: "text-parchment-600" };
 }
 
-type SectionId = "neighbors" | "geography" | "mythology" | "storylines" | "agreements";
+type SectionId = "chronicle" | "neighbors" | "geography" | "mythology" | "storylines" | "agreements";
+
+const SEASON_ICONS: Record<string, string> = {
+  spring: "\u{1F331}",
+  summer: "\u2600",
+  autumn: "\u{1F342}",
+  winter: "\u2744",
+};
 
 export function WorldSidebar({
   isOpen,
@@ -39,6 +49,8 @@ export function WorldSidebar({
   relationships,
   flags,
   storylines,
+  eventHistory,
+  clanName,
 }: WorldSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<SectionId>>(
     new Set(["neighbors"]),
@@ -74,7 +86,7 @@ export function WorldSidebar({
       >
         {/* Header */}
         <div className="sticky top-0 bg-parchment-50 border-b border-parchment-300 px-5 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-parchment-900">Clan Lore</h2>
+          <h2 className="text-lg font-bold text-parchment-900">Chronicle &amp; Lore</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center text-parchment-500 hover:text-parchment-800
@@ -86,6 +98,44 @@ export function WorldSidebar({
         </div>
 
         <div className="px-5 py-4 space-y-2">
+          {/* Chronicle Section */}
+          <SectionHeader
+            title={clanName ? `Chronicle of the ${clanName}` : "Chronicle"}
+            isOpen={expandedSections.has("chronicle")}
+            onToggle={() => toggleSection("chronicle")}
+            count={eventHistory.length > 0 ? eventHistory.length : undefined}
+          />
+          {expandedSections.has("chronicle") && (
+            <div className="pb-3">
+              {eventHistory.length === 0 ? (
+                <p className="text-sm text-parchment-500 italic px-1">
+                  No events yet recorded.
+                </p>
+              ) : (
+                <div className="space-y-2 border-l-2 border-parchment-300 pl-4 max-h-80 overflow-y-auto">
+                  {eventHistory.slice().reverse().map((entry, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xs font-sans text-parchment-500 whitespace-nowrap">
+                          {SEASON_ICONS[entry.season] ?? ""} Year {entry.year}, {entry.season}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-parchment-800">
+                        {entry.title}
+                      </p>
+                      <p className="text-sm text-parchment-700">
+                        {entry.summary}
+                      </p>
+                      <p className="text-xs text-parchment-500 italic">
+                        You chose: {entry.chosenOption}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Neighbors Section */}
           <SectionHeader
             title="Neighbors"
@@ -264,10 +314,12 @@ function SectionHeader({
   title,
   isOpen,
   onToggle,
+  count,
 }: {
   title: string;
   isOpen: boolean;
   onToggle: () => void;
+  count?: number;
 }) {
   return (
     <button
@@ -277,6 +329,11 @@ function SectionHeader({
     >
       <span className="text-sm font-sans font-bold text-parchment-700 uppercase tracking-wide">
         {title}
+        {count !== undefined && (
+          <span className="font-normal text-parchment-500 ml-2 normal-case tracking-normal">
+            ({count})
+          </span>
+        )}
       </span>
       <span className="text-parchment-500 text-xs">{isOpen ? "▼" : "▶"}</span>
     </button>

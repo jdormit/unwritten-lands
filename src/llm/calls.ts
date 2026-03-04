@@ -6,6 +6,7 @@ import {
   narratorOutputSchema,
   sacredTimeOutputSchema,
   epilogueOutputSchema,
+  consequenceOutputSchema,
   themeSchema,
 } from "../types/schemas";
 import type {
@@ -17,12 +18,14 @@ import type {
   NarratorOutput,
   SacredTimeOutput,
   EpilogueOutput,
+  ConsequenceOutput,
+  ChoiceResult,
   GameState,
 } from "../types/game";
 import { createModel } from "./client";
 import {
   THEME_GEN_SYSTEM,
-  THEME_GEN_PROMPT,
+  buildThemeGenPrompt,
   WORLD_GEN_SYSTEM,
   buildWorldGenPrompt,
   getDirectorSystemPrompt,
@@ -34,7 +37,15 @@ import {
   getSacredTimePrompt,
   getEpilogueSystemPrompt,
   getEpiloguePrompt,
+  getConsequenceSystemPrompt,
+  getConsequencePrompt,
 } from "./prompts";
+import {
+  TERRAIN_SEEDS,
+  CULTURE_SEEDS,
+  MYTHIC_TONE_SEEDS,
+  pickRandom,
+} from "./theme-seeds";
 
 // ============================================================
 // Retry helper
@@ -62,11 +73,16 @@ async function withRetry<T>(
 async function generateTheme(auth: Auth): Promise<ThemeSeed> {
   const model = createModel(auth);
 
+  // Randomly sample one seed from each list for combinatorial variety
+  const terrain = pickRandom(TERRAIN_SEEDS);
+  const culture = pickRandom(CULTURE_SEEDS);
+  const mythicTone = pickRandom(MYTHIC_TONE_SEEDS);
+
   return withRetry(async () => {
     const { output } = await generateText({
       model,
       system: THEME_GEN_SYSTEM,
-      prompt: THEME_GEN_PROMPT,
+      prompt: buildThemeGenPrompt(terrain, culture, mythicTone),
       output: Output.object({
         schema: themeSchema,
       }),
@@ -221,6 +237,35 @@ export async function generateSacredTime(
     }
 
     return output as SacredTimeOutput;
+  });
+}
+
+// ============================================================
+// Consequence (aftermath of a choice)
+// ============================================================
+
+export async function generateConsequence(
+  auth: Auth,
+  state: GameState,
+  choiceResult: ChoiceResult,
+): Promise<ConsequenceOutput> {
+  const model = createModel(auth);
+
+  return withRetry(async () => {
+    const { output } = await generateText({
+      model,
+      system: getConsequenceSystemPrompt(state),
+      prompt: getConsequencePrompt(choiceResult),
+      output: Output.object({
+        schema: consequenceOutputSchema,
+      }),
+    });
+
+    if (!output) {
+      throw new Error("No structured output received from consequence narrator");
+    }
+
+    return output as ConsequenceOutput;
   });
 }
 

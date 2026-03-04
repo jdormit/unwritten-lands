@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGame } from "../state/game-context";
 import { getAvailableActions } from "../hooks/usePlayerActions";
 import { GameHeader } from "../components/GameHeader";
-import { WorldSidebar } from "../components/WorldSidebar";
+import { WorldSidebar, getRelationshipDisplay } from "../components/WorldSidebar";
 import type { PlayerAction } from "../types/game";
 
 interface ActionSelectionScreenProps {
@@ -57,6 +57,8 @@ export function ActionSelectionScreen({
           relationships={state.clan_relationships}
           flags={state.flags}
           storylines={state.active_storylines}
+          eventHistory={state.event_history}
+          clanName={state.world.clan.name}
         />
 
         <div className="flex-1 w-full max-w-2xl mx-auto space-y-5">
@@ -87,20 +89,14 @@ export function ActionSelectionScreen({
                     <span className="font-bold text-parchment-900">
                       {target}
                     </span>
-                    {rel && (
-                      <span
-                        className={`text-sm font-sans ${
-                          rel.score > 0
-                            ? "text-forest"
-                            : rel.score < 0
-                              ? "text-blood"
-                              : "text-parchment-500"
-                        }`}
-                      >
-                        Relationship: {rel.score > 0 ? "+" : ""}
-                        {rel.score}
-                      </span>
-                    )}
+                    {rel && (() => {
+                      const { label, color } = getRelationshipDisplay(rel.score);
+                      return (
+                        <span className={`text-sm font-sans ${color}`}>
+                          {label}
+                        </span>
+                      );
+                    })()}
                   </div>
                   {clan && (
                     <p className="text-sm text-parchment-600 mt-1">
@@ -140,13 +136,17 @@ export function ActionSelectionScreen({
         relationships={state.clan_relationships}
         flags={state.flags}
         storylines={state.active_storylines}
+        eventHistory={state.event_history}
+        clanName={state.world.clan.name}
       />
 
       <div className="flex-1 w-full max-w-2xl mx-auto space-y-5">
-        <div className="parchment-card px-6 py-5 space-y-2">
-          <h3 className="text-xl font-bold text-parchment-900">
-            The season stretches before you.
-          </h3>
+        {/* Screen Title */}
+        <h2 className="text-3xl font-bold text-parchment-900 text-center">
+          The season stretches before you.
+        </h2>
+
+        <div className="parchment-card px-6 py-5">
           <p className="text-parchment-700">
             What will the {state.world.clan.name} do?
           </p>

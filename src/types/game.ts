@@ -140,6 +140,8 @@ export interface ResolvedStoryline {
 export interface HistoryEntry {
   year: number;
   season: Season;
+  title: string;
+  chosenOption: string;
   summary: string;
 }
 
@@ -242,6 +244,7 @@ export interface AdvisorOpinion {
 }
 
 export interface NarratorOutput {
+  event_title: string;
   event_narrative: string;
   advisor_opinions: AdvisorOpinion[];
   option_texts: string[];
@@ -265,6 +268,33 @@ export interface EpilogueOutput {
   saga_title: string;
   saga_text: string;
   outcome: EpilogueOutcome;
+}
+
+// ============================================================
+// Consequence Output (LLM-generated aftermath of a choice)
+// ============================================================
+
+export interface ConsequenceOutput {
+  consequence_narrative: string;
+  continue_text: string;
+  chronicle_entry: string;
+}
+
+// ============================================================
+// Choice Result (mechanical data from a resolved choice)
+// ============================================================
+
+export interface ChoiceResult {
+  event_title: string;
+  chosen_option_text: string;
+  chosen_option_summary: string;
+  resource_effects: Partial<Resources>;
+  relationship_effects: { clan_name: string; change: number }[] | null;
+  previous_resources: Resources;
+  new_resources: Resources;
+  flags_added: { flag: string; description: string }[] | null;
+  flags_removed: string[] | null;
+  isPlayerAction: boolean;
 }
 
 // ============================================================
@@ -296,6 +326,8 @@ export interface GameState {
   event_history: HistoryEntry[];
   full_history: HistoryEntry[];
   current_event: CurrentEvent | null;
+  last_choice_result: ChoiceResult | null;
+  consequence: ConsequenceOutput | null;
   sacred_time: SacredTimeOutput | null;
   epilogue: EpilogueOutput | null;
   last_event_type: string | null;

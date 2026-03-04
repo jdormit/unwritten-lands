@@ -1,42 +1,33 @@
-import type { GameState, DirectorOutput } from "../types/game";
+import type { GameState, DirectorOutput, ChoiceResult } from "../types/game";
 import type { ThemeSeed } from "../types/schemas";
 
 // ============================================================
 // Theme Generation Prompt (pre-worldbuilding diversity seed)
 // ============================================================
 
-export const THEME_GEN_SYSTEM = `You are a theme generator for a mythic narrative strategy game. Your job is to produce a single, vivid geographic and cultural theme seed that a world-builder will use to create a full setting.
+export const THEME_GEN_SYSTEM = `You are a theme generator for a mythic narrative strategy game. Your job is to synthesize a set of creative seeds into a single, vivid geographic and cultural theme that a world-builder will use to create a full setting.
 
-DIVERSITY IS CRITICAL. Each theme you generate must feel genuinely distinct from typical fantasy defaults. Draw from the full breadth of human geography and culture. Consider:
-
-Terrain types (choose any — all are equally valid):
-  steppe, jungle, tundra, desert, volcanic highlands, river delta, canyon lands,
-  mountain passes, vast plains, dense forest, karst limestone formations, salt flats,
-  floating wetlands, taiga, savanna, archipelago, glacial valleys, mesa badlands,
-  underground cave networks, mangrove coast, alpine meadow, peat bog
-
-Climate types:
-  tropical, arid, arctic, temperate, monsoon, continental, alpine, subarctic,
-  Mediterranean, semi-arid, equatorial, oceanic
-
-Cultural inspirations (blend, don't copy directly):
-  Saharan Tuareg, Andean Quechua, Siberian Evenki, Southeast Asian Khmer,
-  Central Asian Kazakh steppe, West African Yoruba, Mesoamerican Zapotec,
-  Aboriginal Australian, Polynesian, Norse, Balkan, Caucasian mountain,
-  Amazonian, Inuit, Tibetan, Ethiopian highland, Mississippian mound-builder,
-  Mongolian, Berber, Maori, Swahili coast, Pueblo, Sámi, Bengali delta,
-  Mapuche, Hmong highland
+You will be given three seeds: a landscape, a cultural inspiration, and a mythic tone. Your task is to weave these into a coherent theme. The seeds are randomly chosen, so some combinations may seem unusual or contradictory — that is fine. Adapt and reinterpret the seeds freely to make them work together. An unexpected combination is an opportunity for originality, not a problem to solve.
 
 RULES:
-- Output exactly one theme
-- The theme should specify a geography AND a cultural tone
-- Be specific and evocative, not generic ("wind-scoured volcanic plateau" not just "mountains")
-- Do NOT default to islands, oceans, or coastal settings — landlocked and interior settings are underrepresented and equally interesting
-- Blend at least two cultural inspirations into something that feels original
+- Output exactly one theme with a geography and cultural tone
+- Stay true to the physical character of the landscape seed
+- Blend the cultural inspirations into something original — do not directly copy either source culture
+- Let the mythic tone color the world's mood and underlying tensions
+- Be specific and evocative, not generic ("wind-scoured volcanic plateau where the earth hums with buried heat" not just "mountains")
+- Do NOT simply restate the seeds — synthesize them into something richer
 
 Output valid JSON matching the requested schema exactly.`;
 
-export const THEME_GEN_PROMPT = `Generate a unique geographic and cultural theme for a new game world. Be creative and unexpected — surprise me with something I haven't seen before.`;
+export function buildThemeGenPrompt(terrain: string, culture: string, mythicTone: string): string {
+  return `Synthesize these elements into a coherent world theme:
+
+Landscape: ${terrain}
+Cultural inspiration: ${culture}
+Mythic tone: ${mythicTone}
+
+Develop these into a specific, vivid geographic setting and cultural identity. Stay true to the landscape. Blend the cultural inspirations into something original. Let the mythic tone color the world's mood and tensions.`;
+}
 
 // ============================================================
 // World Generation Prompt
@@ -210,8 +201,9 @@ RECENT HISTORY:
 ${state.event_history.slice(-3).map(h => `Year ${h.year}, ${h.season}: ${h.summary}`).join("\n") || "No recent history."}
 
 RULES:
-1. event_narrative: 2-4 sentences. Vivid, concrete, grounded in the world. The player must clearly understand what situation they are facing and what is at stake.
-2. advisor_opinions: One opinion per advisor (exactly 3). Each 1-2 sentences, in character.
+1. event_title: A short, evocative title for this event (2-5 words). Should capture the essence of the situation, e.g. "Riders at the Gate", "The Harvest Quarrel", "A Debt Recalled". For player-initiated actions, the title should reflect what the player is doing, e.g. "The Raid Begins", "A Trading Expedition", "Into the Unknown".
+2. event_narrative: 2-4 sentences. Vivid, concrete, grounded in the world. The player must clearly understand what situation they are facing and what is at stake.
+3. advisor_opinions: One opinion per advisor (exactly 3). Each 1-2 sentences, in character.
    - Advisors should reflect their personality AND the current game state
    - They should sometimes disagree with each other
    - The warrior might counsel restraint when People is low
@@ -219,7 +211,7 @@ RULES:
    - Reference active storylines when relevant
    - Advisors must NEVER mention specific resource numbers or treat them as literal quantities. "Our warriors are spread thin" is good. "We only have 3 people" is bad. The resource numbers are abstract gauges — translate them into narrative language.
    - Advisors should give concrete, actionable advice. They can use colorful language, but the meaning of their counsel must be clear. "We should trade with them while they're willing" is good. "Map distance and miss fate" is bad.
-3. option_texts: Exactly 3. Short imperative sentences, 1 line each.
+4. option_texts: Exactly 3. Short imperative sentences, 1 line each.
    - Each option must describe a clear, concrete, understandable action. The player must know exactly what they are deciding to do.
    - e.g. "Sell only the wool." / "Demand they owe you a favor." / "Turn them away."
    - Do NOT use poetic or metaphorical language for options. "Send warriors to guard the pass" is good. "Let iron speak where words have failed" is bad.
@@ -352,4 +344,78 @@ export function getEpiloguePrompt(state: GameState): string {
     return `Write the collapse epilogue. The clan fell because their ${depletedResource} was depleted.`;
   }
   return `Write the climax epilogue. The ${state.world!.looming_threat.name} has arrived. Determine the clan's fate based on their full history of choices and preparations.`;
+}
+
+// ============================================================
+// Consequence Prompt
+// ============================================================
+
+export function getConsequenceSystemPrompt(state: GameState): string {
+  return `You are the Narrator of a mythic narrative strategy game. You are writing the immediate aftermath of a decision the player just made.
+
+VOICE AND STYLE:
+- Saga-like but not overwrought. Concrete sensory details. Short paragraphs.
+- Think oral history, campfire storytelling — vivid but economical
+- Describe what HAPPENED as a direct result of the choice. This is past tense — the deed is done.
+- Reference established world details, mythology, geography, and recent history for continuity
+- Do NOT mention any numbers, resource values, or game-mechanical concepts. Translate everything into narrative language.
+- Do NOT repeat the choice the player made — they already know what they chose. Describe the CONSEQUENCES.
+
+WORLD CONTEXT:
+- Setting: ${state.world!.setting.name} — ${state.world!.setting.geography}
+- Mythology: ${state.world!.mythology.pantheon_summary}
+- Clan: ${state.world!.clan.name} — ${state.world!.clan.backstory}
+- Key Deities: ${state.world!.mythology.key_deities.map(d => `${d.name} (${d.domain})`).join(", ")}
+
+CURRENT STATE:
+- Year ${state.current_year}, ${state.current_season}
+- Neighboring clans: ${state.clan_relationships.map(r => `${r.clan_name} (relationship: ${r.score > 0 ? "friendly" : r.score < 0 ? "hostile" : "neutral"})`).join(", ")}
+
+RULES:
+1. consequence_narrative: 2-3 sentences. Describe the tangible aftermath — what the clan sees, hears, and experiences as a result of this choice. Be specific and grounded. Every sentence must convey clear, concrete meaning.
+2. continue_text: A short atmospheric phrase (3-6 words) for the button that advances the game. It should feel in-world and contextual — tied to the season, the situation, or the mood. Examples: "The wind carries the news...", "Winter deepens around the hearth...", "The drums fall silent...", "Smoke rises from the valley...". NEVER use generic UI text like "Continue" or "Next".
+3. chronicle_entry: A concise 1-2 sentence summary of the event and the clan's decision, written as a saga historian would record it for the chronicle. Should capture BOTH what happened and what the clan chose to do about it. Focus on the significance — why this event mattered. Example: "When the Elk Clan demanded tribute, the clan refused and sent warriors to guard the pass. The Elk retreated, but their grudge only deepened."
+
+Output valid JSON matching the requested schema exactly.`;
+}
+
+function describeResourceEffects(effects: Partial<Record<string, number | null>>): string {
+  const parts: string[] = [];
+  for (const [key, val] of Object.entries(effects)) {
+    if (val == null || val === 0) continue;
+    const direction = val > 0 ? "increased" : "decreased";
+    const magnitude = Math.abs(val) >= 2 ? "significantly " : "";
+    parts.push(`The clan's ${key} ${magnitude}${direction}`);
+  }
+  return parts.length > 0 ? parts.join(". ") + "." : "No significant material changes.";
+}
+
+function describeRelationshipEffects(effects: { clan_name: string; change: number }[] | null): string {
+  if (!effects || effects.length === 0) return "";
+  const parts = effects.map(e => {
+    const direction = e.change > 0 ? "improved" : "worsened";
+    const magnitude = Math.abs(e.change) >= 2 ? "dramatically " : "";
+    return `Relations with the ${e.clan_name} ${magnitude}${direction}`;
+  });
+  return parts.join(". ") + ".";
+}
+
+export function getConsequencePrompt(choiceResult: ChoiceResult): string {
+  const relationshipDesc = describeRelationshipEffects(choiceResult.relationship_effects);
+  const flagsDesc = choiceResult.flags_added
+    ? choiceResult.flags_added.map(f => f.description).join(". ") + "."
+    : "";
+
+  return `Write the consequence narrative for this event:
+
+Event: ${choiceResult.event_title}
+The player chose: "${choiceResult.chosen_option_text}" (${choiceResult.chosen_option_summary})
+${choiceResult.isPlayerAction ? "This was a player-initiated action." : "This was a seasonal event."}
+
+What happened as a result:
+- ${describeResourceEffects(choiceResult.resource_effects)}
+${relationshipDesc ? `- ${relationshipDesc}` : ""}
+${flagsDesc ? `- ${flagsDesc}` : ""}
+
+Write the immediate aftermath. Be vivid and specific. Do not restate the choice — describe what followed from it.`;
 }
