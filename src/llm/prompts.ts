@@ -1,5 +1,6 @@
 import type { GameState, DirectorOutput, ChoiceResult } from "../types/game";
 import type { ThemeSeed } from "../types/schemas";
+import { pickSceneSeeds, pickActionSeeds } from "./scene-seeds";
 
 // ============================================================
 // Theme Generation Prompt (pre-worldbuilding diversity seed)
@@ -127,11 +128,20 @@ CLARITY RULES:
 - option summaries must describe concrete, understandable actions
 - Do NOT invent unexplained lore jargon in any field
 
+CREATIVE SEEDS:
+You will receive abstract creative seeds with each event request. Use them as inspiration for the event's dramatic shape — interpret them freely, not literally. Unexpected interpretations are encouraged. They do NOT override storyline continuity or event selection rules. Still reference active storylines and advance ongoing narrative as the rules require.
+
 Output valid JSON matching the requested schema exactly.`;
 }
 
 function buildDirectorPromptForEvent(state: GameState): string {
-  return `Generate the next seasonal event for Year ${state.current_year}, ${state.current_season}. Follow the event selection and option design rules strictly.`;
+  const seeds = pickSceneSeeds();
+  return `Generate the next seasonal event for Year ${state.current_year}, ${state.current_season}. Follow the event selection and option design rules strictly.
+
+CREATIVE SEEDS (interpret freely):
+- Situation: "${seeds.situation}"
+- Tension: "${seeds.tension}"
+- Scope: "${seeds.scope}"`;
 }
 
 function buildDirectorPromptForAction(
@@ -140,12 +150,17 @@ function buildDirectorPromptForAction(
   targetClan?: string,
 ): string {
   const targetStr = targetClan ? ` targeting ${targetClan}` : "";
+  const seeds = pickActionSeeds();
   return `The player has chosen to initiate a "${actionType}" action${targetStr}. Generate an event that represents this action's scenario. The event should present the situation and give the player 3 options for HOW to carry it out. Keep it shorter and more focused than a regular seasonal event — this is a player-initiated vignette.
 
 Action context:
 - Action: ${actionType}${targetStr}
 - This is a player-initiated action, not a random event
-- The event should feel like the player is taking initiative, not reacting`;
+- The event should feel like the player is taking initiative, not reacting
+
+CREATIVE SEEDS (interpret freely — the situation is defined by the player's action):
+- Tension: "${seeds.tension}"
+- Scope: "${seeds.scope}"`;
 }
 
 export function getDirectorSystemPrompt(state: GameState): string {
