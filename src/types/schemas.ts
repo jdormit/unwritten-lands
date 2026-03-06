@@ -94,6 +94,14 @@ export const directorOutputSchema = z.object({
       type: z.string(),
       label: z.string(),
       description: z.string(),
+      requirements: z.array(z.object({
+        type: z.enum(["min_resource", "max_resource", "season", "min_relationship", "max_relationship"]),
+        resource: z.enum(["people", "wealth", "magic", "reputation"]).nullable().describe("Required for min_resource/max_resource types"),
+        clan_name: z.string().nullable().describe("Required for min_relationship/max_relationship types"),
+        season: z.enum(["spring", "summer", "autumn", "winter"]).nullable().describe("Required for season type"),
+        value: z.number().nullable().describe("Threshold value for resource (0-10) or relationship (-3 to 3) requirements"),
+        unmet_hint: z.string().describe("A short, thematic, immersive sentence explaining why the action is unavailable. Must NOT mention numbers, scores, or game mechanics."),
+      })).nullable().describe("Optional requirements that must be met to use this action. Only add when thematically appropriate — many actions should have no requirements."),
     }).nullable(),
   })).length(3).describe("Exactly 3 options"),
 });

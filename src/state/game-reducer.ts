@@ -205,8 +205,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       let newUnlockedActions = [...state.unlocked_actions];
       if (option.unlocks_action) {
         const ua: UnlockedAction = {
-          ...option.unlocks_action,
+          type: option.unlocks_action.type,
+          label: option.unlocks_action.label,
+          description: option.unlocks_action.description,
           from_flag: option.unlocks_action.type,
+          requirements: option.unlocks_action.requirements ?? undefined,
         };
         if (!newUnlockedActions.some((a) => a.type === ua.type)) {
           newUnlockedActions = [...newUnlockedActions, ua];

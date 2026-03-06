@@ -124,6 +124,25 @@ FLAG RULES:
 - flags_added entries must include a short snake_case "flag" id and a "description" that is a brief, player-readable sentence explaining what it represents (e.g. flag: "elk_clan_owes_favor", description: "The Elk Clan owes you a favor for your aid")
 - flags_removed should reference existing flag ids
 
+UNLOCKED ACTION REQUIREMENTS:
+When an option unlocks a new player action (unlocks_action), you MAY attach requirements that must ALL be met before the player can use that action. Requirements are optional — only add them when it makes thematic sense for the action to require certain conditions. Many unlocked actions should have NO requirements at all (set requirements to null).
+
+Available requirement types:
+- min_resource / max_resource: Requires a resource (people, wealth, magic, reputation) to be at or above/below a threshold (1-9). Use when the action logically demands or is incompatible with certain resource levels.
+- season: Requires a specific season (spring, summer, autumn, winter). Use when the action only makes sense at a certain time of year.
+- min_relationship / max_relationship: Requires a relationship with a specific neighboring clan to be at or above/below a threshold (-3 to 3). Use when the action depends on alliances, enmities, or specific diplomatic standing with a named clan.
+
+For each requirement, provide an unmet_hint: a short, thematic, immersive sentence explaining why the action is unavailable. This text is shown directly to the player. It must NOT mention numbers, scores, thresholds, or game mechanics — only narrative language.
+Examples:
+  GOOD: "The clan lacks the spiritual strength to attempt this ritual."
+  BAD: "Requires magic >= 4."
+  GOOD: "This can only be done when the rivers thaw in spring."
+  BAD: "Season must be spring."
+  GOOD: "The River Clan would never agree to this while relations are so strained."
+  BAD: "Relationship with River Clan must be >= 1."
+
+Keep requirements reasonable — don't lock actions behind extreme thresholds (e.g. requiring 9 or 10 in a resource). 1-2 requirements per action is typical; more than 3 is excessive.
+
 CLARITY RULES:
 - season_context and threat_foreshadowing must be clearly understandable, not poetic riddles
 - option summaries must describe concrete, understandable actions

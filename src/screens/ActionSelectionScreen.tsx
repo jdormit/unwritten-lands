@@ -22,6 +22,7 @@ export function ActionSelectionScreen({
   const actions = getAvailableActions(state);
 
   function handleActionClick(action: PlayerAction) {
+    if (action.locked) return;
     if (action.requiresTarget) {
       setSelectedAction(action);
       setSelectedTarget(null);
@@ -157,14 +158,29 @@ export function ActionSelectionScreen({
             <button
               key={action.type + (action.label)}
               onClick={() => handleActionClick(action)}
-              className="w-full text-left px-5 py-4 parchment-card border-2 border-parchment-300
-                hover:border-parchment-500 hover:bg-parchment-100 transition-all cursor-pointer"
+              disabled={action.locked}
+              className={`w-full text-left px-5 py-4 parchment-card border-2 transition-all
+                ${action.locked
+                  ? "border-parchment-200 opacity-50 cursor-not-allowed"
+                  : "border-parchment-300 hover:border-parchment-500 hover:bg-parchment-100 cursor-pointer"
+                }`}
             >
-              <p className="font-bold text-parchment-900">{action.label}</p>
+              <p className={`font-bold ${action.locked ? "text-parchment-500" : "text-parchment-900"}`}>
+                {action.label}
+              </p>
               {action.description && (
-                <p className="text-sm text-parchment-600 mt-1">
+                <p className={`text-sm mt-1 ${action.locked ? "text-parchment-400" : "text-parchment-600"}`}>
                   {action.description}
                 </p>
+              )}
+              {action.locked && action.lockReasons && action.lockReasons.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {action.lockReasons.map((reason, i) => (
+                    <p key={i} className="text-xs italic text-parchment-400">
+                      {reason}
+                    </p>
+                  ))}
+                </div>
               )}
             </button>
           ))}

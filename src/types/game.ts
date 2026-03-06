@@ -180,12 +180,23 @@ export type PlayerActionType =
   | "prepare_threat"
   | "custom";
 
+export interface ActionRequirement {
+  type: "min_resource" | "max_resource" | "season" | "min_relationship" | "max_relationship";
+  resource?: ResourceKey;       // for resource requirements
+  clan_name?: string;           // for relationship requirements
+  season?: Season;              // for season requirements
+  value?: number;               // threshold for resource/relationship requirements
+  unmet_hint: string;           // thematic, immersive text (no numbers)
+}
+
 export interface PlayerAction {
   type: PlayerActionType;
   label: string;
   description?: string;
   requiresTarget?: boolean;
   validTargets?: string[]; // clan names
+  locked?: boolean;
+  lockReasons?: string[];
 }
 
 export interface UnlockedAction {
@@ -193,6 +204,7 @@ export interface UnlockedAction {
   label: string;
   description: string;
   from_flag: string;
+  requirements?: ActionRequirement[];
 }
 
 // ============================================================
@@ -213,6 +225,7 @@ export interface DirectorOption {
     type: string;
     label: string;
     description: string;
+    requirements?: ActionRequirement[] | null;
   } | null;
 }
 
