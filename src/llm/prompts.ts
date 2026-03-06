@@ -11,12 +11,13 @@ export const THEME_GEN_SYSTEM = `You are a theme generator for a mythic narrativ
 You will be given three seeds: a landscape, a cultural inspiration, and a mythic tone. Your task is to weave these into a coherent theme. The seeds are randomly chosen, so some combinations may seem unusual or contradictory — that is fine. Adapt and reinterpret the seeds freely to make them work together. An unexpected combination is an opportunity for originality, not a problem to solve.
 
 RULES:
-- Output exactly one theme with a geography and cultural tone
+- Output exactly one theme with a geography, cultural tone, and atmospheric description
 - Stay true to the physical character of the landscape seed
 - Blend the cultural inspirations into something original — do not directly copy either source culture
 - Let the mythic tone color the world's mood and underlying tensions
 - Be specific and evocative, not generic ("wind-scoured volcanic plateau where the earth hums with buried heat" not just "mountains")
 - Do NOT simply restate the seeds — synthesize them into something richer
+- The description should be 2-3 sentences of immersive, second-person prose that makes the player feel like they're arriving in this world for the first time
 
 Output valid JSON matching the requested schema exactly.`;
 
@@ -270,7 +271,7 @@ export function getSacredTimeSystemPrompt(state: GameState): string {
 
 WORLD:
 - Setting: ${state.world!.setting.name}
-- Clan: ${state.world!.clan.name}
+- Clan: ${state.world!.clan.name} — ${state.world!.clan.backstory}
 - Mythology: ${state.world!.mythology.pantheon_summary}
 - Looming Threat: ${state.world!.looming_threat.name} — ${state.world!.looming_threat.description}
 
@@ -292,7 +293,7 @@ THREAT PROGRESSION:
 Current year: ${state.current_year}
 
 RULES:
-- year_recap: 2-3 sentences summarizing what happened last year. For Year 1, describe the clan's arrival/settling.
+- year_recap: 2-3 sentences summarizing what happened last year. For Year 1, describe the clan's current situation as their story begins — this must be consistent with the clan backstory provided above.
 - omens: 1-2 sentences of prophecy or foreshadowing for the coming year. Should feel mystical and vague but evocative. For Year 1, omens should relate to the immediate challenges of settling — NOT the looming threat.
 - threat_status: 1 sentence on the looming threat's current state, appropriate to the threat progression schedule.
   IMPORTANT: For Years 1-2, threat_status should be an empty string (""). The threat should not be mentioned at all this early — the clan doesn't know about it yet. Starting in Year 3, introduce the first subtle hints.
@@ -305,7 +306,7 @@ Output valid JSON matching the requested schema exactly.`;
 
 export function getSacredTimePrompt(state: GameState): string {
   if (state.current_year === 1) {
-    return "Generate the Sacred Time narrative for Year 1 — the first year of the clan's story. The recap should describe their arrival or beginning.";
+    return "Generate the Sacred Time narrative for Year 1 — the first year of the clan's story. The recap should describe the clan's current situation as their story begins, consistent with their known backstory.";
   }
   return `Generate the Sacred Time narrative for the start of Year ${state.current_year}.`;
 }

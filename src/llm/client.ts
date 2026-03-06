@@ -1,7 +1,7 @@
 import { createCodexOAuth } from "ai-sdk-codex-oauth";
 import type { Auth } from "ai-sdk-codex-oauth";
 
-const MODEL_ID = "gpt-5.3-codex";
+const MODEL_ID = "gpt-5.2";
 
 /**
  * Create a language model instance from an Auth object.

@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import type { Auth } from "ai-sdk-codex-oauth";
-import { generateConsequence } from "../llm/calls";
+import type { DeepPartial } from "ai";
+import { streamConsequence } from "../llm/calls";
 import { useGame } from "../state/game-context";
 import { LoadingState } from "../components/LoadingState";
 import { GameHeader } from "../components/GameHeader";
 import { EventNarrative } from "../components/EventNarrative";
 import { WorldSidebar } from "../components/WorldSidebar";
 import { saveGame } from "../persistence/save";
+import type { ConsequenceOutput } from "../types/game";
 
 interface ConsequenceScreenProps {
   auth: Auth;
@@ -14,35 +16,59 @@ interface ConsequenceScreenProps {
 
 export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
   const { state, dispatch } = useGame();
-  const [loading, setLoading] = useState(!state.consequence);
   const [error, setError] = useState<string | null>(null);
   const [loreOpen, setLoreOpen] = useState(false);
   const generationTriggered = useRef(false);
   const cancelledRef = useRef(false);
+  const abortRef = useRef<(() => void) | null>(null);
+
+  // Streaming state
+  const [partial, setPartial] = useState<DeepPartial<ConsequenceOutput> | null>(null);
+  const [complete, setComplete] = useState<ConsequenceOutput | null>(state.consequence ?? null);
 
   const choiceResult = state.last_choice_result;
 
-  const generate = useCallback(async () => {
+  const generate = useCallback(() => {
     if (!choiceResult) return;
     cancelledRef.current = false;
+    setError(null);
+    setPartial(null);
+    setComplete(null);
 
-    try {
-      const consequence = await generateConsequence(auth, state, choiceResult);
-      if (!cancelledRef.current) {
-        dispatch({ type: "SET_CONSEQUENCE", consequence });
-        setLoading(false);
+    const stream = streamConsequence(auth, state, choiceResult);
+    abortRef.current = stream.abort;
+
+    // Consume partial stream
+    (async () => {
+      try {
+        for await (const partialObj of stream.partialStream) {
+          if (cancelledRef.current) return;
+          setPartial(partialObj);
+        }
+      } catch {
+        // Errors handled by finalOutput
       }
-    } catch (e) {
-      if (!cancelledRef.current) {
-        setError(e instanceof Error ? e.message : "The outcome is unclear...");
-        setLoading(false);
-      }
-    }
+    })();
+
+    // Wait for final output
+    stream.finalOutput
+      .then((output) => {
+        if (cancelledRef.current) return;
+        setComplete(output);
+        dispatch({ type: "SET_CONSEQUENCE", consequence: output });
+      })
+      .catch((e) => {
+        if (!cancelledRef.current) {
+          setError(e instanceof Error ? e.message : "The outcome is unclear...");
+        }
+      });
   }, [auth, state, choiceResult, dispatch]);
 
   useEffect(() => {
     if (state.consequence || generationTriggered.current) {
-      setLoading(false);
+      if (state.consequence) {
+        setComplete(state.consequence);
+      }
       return;
     }
 
@@ -51,6 +77,7 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
 
     return () => {
       cancelledRef.current = true;
+      abortRef.current?.();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -71,39 +98,11 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
 
   function handleRetry() {
     setError(null);
-    setLoading(true);
+    generationTriggered.current = false;
     generate();
   }
 
   if (!choiceResult || !state.world) return null;
-
-  if (loading) {
-    return (
-      <div className="min-h-dvh flex flex-col px-4 py-4">
-        <GameHeader
-          clanName={state.world.clan.name}
-          year={state.current_year}
-          season={state.current_season}
-          resources={state.resources}
-          previousResources={choiceResult.previous_resources}
-          onOpenLore={() => setLoreOpen(true)}
-        />
-        <WorldSidebar
-          isOpen={loreOpen}
-          onClose={() => setLoreOpen(false)}
-          world={state.world}
-          relationships={state.clan_relationships}
-          flags={state.flags}
-          storylines={state.active_storylines}
-          eventHistory={state.event_history}
-          clanName={state.world.clan.name}
-        />
-        <div className="flex-1 flex items-center justify-center">
-          <LoadingState message="The dust settles..." />
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -142,7 +141,38 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
     );
   }
 
-  const consequence = state.consequence!;
+  // Use complete or partial data
+  const consequence = complete ?? partial;
+  const isStreaming = !complete;
+
+  // Nothing yet — initial loading
+  if (!consequence) {
+    return (
+      <div className="min-h-dvh flex flex-col px-4 py-4">
+        <GameHeader
+          clanName={state.world.clan.name}
+          year={state.current_year}
+          season={state.current_season}
+          resources={state.resources}
+          previousResources={choiceResult.previous_resources}
+          onOpenLore={() => setLoreOpen(true)}
+        />
+        <WorldSidebar
+          isOpen={loreOpen}
+          onClose={() => setLoreOpen(false)}
+          world={state.world}
+          relationships={state.clan_relationships}
+          flags={state.flags}
+          storylines={state.active_storylines}
+          eventHistory={state.event_history}
+          clanName={state.world.clan.name}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <LoadingState message="The dust settles..." />
+        </div>
+      </div>
+    );
+  }
 
   // Build relationship change descriptions
   const relationshipDescriptions: string[] = [];
@@ -200,14 +230,23 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
           </p>
         </div>
 
-        {/* Consequence narrative */}
-        <div className="parchment-card px-6 py-5">
-          <EventNarrative text={consequence.consequence_narrative} />
-        </div>
+        {/* Consequence narrative — streams in */}
+        {consequence.consequence_narrative && (
+          <div className="parchment-card px-6 py-5 animate-fade-in">
+            <EventNarrative text={consequence.consequence_narrative} />
+          </div>
+        )}
 
-        {/* Relationship changes */}
-        {relationshipDescriptions.length > 0 && (
-          <div className="text-center space-y-1">
+        {/* Still streaming indicator */}
+        {isStreaming && (
+          <div className="flex justify-center py-4">
+            <div className="w-32 h-1 rounded-full overflow-hidden loading-shimmer" />
+          </div>
+        )}
+
+        {/* Relationship changes — show once streaming complete */}
+        {!isStreaming && relationshipDescriptions.length > 0 && (
+          <div className="text-center space-y-1 animate-fade-in">
             {relationshipDescriptions.map((desc, i) => (
               <p key={i} className="text-sm text-parchment-600 italic">
                 {desc}
@@ -216,18 +255,20 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
           </div>
         )}
 
-        {/* Continue button */}
-        <div className="pt-2 pb-8">
-          <button
-            onClick={handleContinue}
-            className="w-full px-6 py-4 parchment-card border-2 border-parchment-300
-              hover:border-parchment-500 hover:bg-parchment-100
-              transition-all duration-200 cursor-pointer
-              text-center text-parchment-800 text-lg italic"
-          >
-            {consequence.continue_text}
-          </button>
-        </div>
+        {/* Continue button — only when complete */}
+        {!isStreaming && consequence.continue_text && (
+          <div className="pt-2 pb-8 animate-fade-in">
+            <button
+              onClick={handleContinue}
+              className="w-full px-6 py-4 parchment-card border-2 border-parchment-300
+                hover:border-parchment-500 hover:bg-parchment-100
+                transition-all duration-200 cursor-pointer
+                text-center text-parchment-800 text-lg italic"
+            >
+              {consequence.continue_text}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

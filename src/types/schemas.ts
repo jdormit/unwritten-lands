@@ -8,6 +8,7 @@ import { z } from "zod";
 export const themeSchema = z.object({
   geography: z.string().describe("The physical landscape and terrain — be specific and vivid, e.g. 'wind-scoured volcanic plateau above the cloud line' not just 'mountains'"),
   cultural_tone: z.string().describe("The cultural flavor and inspiration — blend real-world influences into something original, e.g. 'draws from Andean mountain cultures and Tibetan monasticism' not just 'Asian-inspired'"),
+  description: z.string().describe("2-3 evocative sentences painting this world's atmosphere for the player. Written in second person present tense, as if the player is arriving for the first time. Concrete sensory details — sights, sounds, smells. E.g. 'You stand on a wind-scoured plateau where sulfur vents hiss between prayer stones. Below, terraced fields cling to volcanic slopes, tended by monks whose chants echo through the cloud line. The air tastes of ash and incense.'"),
 });
 
 export type ThemeSeed = z.infer<typeof themeSchema>;
@@ -30,7 +31,7 @@ export const worldGenerationSchema = z.object({
   }),
   clan: z.object({
     name: z.string().describe("The player's clan name"),
-    backstory: z.string().describe("2-3 sentences about the clan's history"),
+    backstory: z.string().describe("2-3 sentences about the clan's history and current situation. This backstory is also used as context for the Year 1 Sacred Time narrative, so it should describe a state of affairs that naturally leads into the start of the game."),
   }),
   advisors: z.array(z.object({
     name: z.string(),

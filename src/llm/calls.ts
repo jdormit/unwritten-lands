@@ -1,4 +1,5 @@
-import { generateText, Output } from "ai";
+import { generateText, streamText, Output } from "ai";
+import type { DeepPartial } from "ai";
 import type { Auth } from "ai-sdk-codex-oauth";
 import {
   worldGenerationSchema,
@@ -67,8 +68,29 @@ async function withRetry<T>(
 }
 
 // ============================================================
+// Streaming helper type
+// ============================================================
+
+export interface StreamHandle<T> {
+  /** Async iterable of partial objects as they stream in */
+  partialStream: AsyncIterable<DeepPartial<T>>;
+  /** Promise that resolves with the final validated output */
+  finalOutput: Promise<T>;
+  /** Abort the stream */
+  abort: () => void;
+}
+
+// ============================================================
 // Theme Generation (pre-worldbuilding diversity seed)
 // ============================================================
+
+export function getThemeSeeds() {
+  return {
+    terrain: pickRandom(TERRAIN_SEEDS),
+    culture: pickRandom(CULTURE_SEEDS),
+    mythicTone: pickRandom(MYTHIC_TONE_SEEDS),
+  };
+}
 
 async function generateTheme(auth: Auth): Promise<ThemeSeed> {
   const model = createModel(auth);
@@ -295,4 +317,191 @@ export async function generateEpilogue(
 
     return output as EpilogueOutput;
   });
+}
+
+// ============================================================
+// Streaming Variants
+// ============================================================
+
+/**
+ * Generate theme with seeds exposed for display.
+ * Returns the seeds used and the theme result.
+ */
+export async function generateThemeWithSeeds(
+  auth: Auth,
+): Promise<{ seeds: { terrain: string; culture: string; mythicTone: string }; theme: ThemeSeed }> {
+  const model = createModel(auth);
+  const seeds = getThemeSeeds();
+
+  const theme = await withRetry(async () => {
+    const { output } = await generateText({
+      model,
+      system: THEME_GEN_SYSTEM,
+      prompt: buildThemeGenPrompt(seeds.terrain, seeds.culture, seeds.mythicTone),
+      output: Output.object({
+        schema: themeSchema,
+      }),
+    });
+
+    if (!output) {
+      throw new Error("No structured output received from theme generation");
+    }
+
+    return output as ThemeSeed;
+  });
+
+  return { seeds, theme };
+}
+
+/**
+ * Stream world generation, yielding partial objects as they arrive.
+ */
+export function streamWorldGeneration(
+  auth: Auth,
+  theme: ThemeSeed,
+): StreamHandle<WorldGeneration> {
+  const model = createModel(auth);
+  const abortController = new AbortController();
+
+  const result = streamText({
+    model,
+    system: WORLD_GEN_SYSTEM,
+    prompt: buildWorldGenPrompt(theme),
+    output: Output.object({
+      schema: worldGenerationSchema,
+    }),
+    abortSignal: abortController.signal,
+  });
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<WorldGeneration>>,
+    finalOutput: result.output.then((output) => {
+      if (!output) throw new Error("No structured output received from world generation");
+      return output as WorldGeneration;
+    }),
+    abort: () => abortController.abort(),
+  };
+}
+
+/**
+ * Stream narrator output, yielding partial objects as they arrive.
+ */
+export function streamNarration(
+  auth: Auth,
+  state: GameState,
+  directorOutput: DirectorOutput,
+  isPlayerAction: boolean,
+): StreamHandle<NarratorOutput> {
+  const model = createModel(auth);
+  const abortController = new AbortController();
+
+  const result = streamText({
+    model,
+    system: getNarratorSystemPrompt(state),
+    prompt: getNarratorPrompt(directorOutput, isPlayerAction),
+    output: Output.object({
+      schema: narratorOutputSchema,
+    }),
+    abortSignal: abortController.signal,
+  });
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<NarratorOutput>>,
+    finalOutput: result.output.then((output) => {
+      if (!output) throw new Error("No structured output received from narrator");
+      return output as NarratorOutput;
+    }),
+    abort: () => abortController.abort(),
+  };
+}
+
+/**
+ * Stream sacred time output.
+ */
+export function streamSacredTime(
+  auth: Auth,
+  state: GameState,
+): StreamHandle<SacredTimeOutput> {
+  const model = createModel(auth);
+  const abortController = new AbortController();
+
+  const result = streamText({
+    model,
+    system: getSacredTimeSystemPrompt(state),
+    prompt: getSacredTimePrompt(state),
+    output: Output.object({
+      schema: sacredTimeOutputSchema,
+    }),
+    abortSignal: abortController.signal,
+  });
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<SacredTimeOutput>>,
+    finalOutput: result.output.then((output) => {
+      if (!output) throw new Error("No structured output received from sacred time");
+      return output as SacredTimeOutput;
+    }),
+    abort: () => abortController.abort(),
+  };
+}
+
+/**
+ * Stream consequence output.
+ */
+export function streamConsequence(
+  auth: Auth,
+  state: GameState,
+  choiceResult: ChoiceResult,
+): StreamHandle<ConsequenceOutput> {
+  const model = createModel(auth);
+  const abortController = new AbortController();
+
+  const result = streamText({
+    model,
+    system: getConsequenceSystemPrompt(state),
+    prompt: getConsequencePrompt(choiceResult),
+    output: Output.object({
+      schema: consequenceOutputSchema,
+    }),
+    abortSignal: abortController.signal,
+  });
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<ConsequenceOutput>>,
+    finalOutput: result.output.then((output) => {
+      if (!output) throw new Error("No structured output received from consequence");
+      return output as ConsequenceOutput;
+    }),
+    abort: () => abortController.abort(),
+  };
+}
+
+/**
+ * Stream epilogue output.
+ */
+export function streamEpilogue(
+  auth: Auth,
+  state: GameState,
+): StreamHandle<EpilogueOutput> {
+  const model = createModel(auth);
+  const abortController = new AbortController();
+
+  const result = streamText({
+    model,
+    system: getEpilogueSystemPrompt(state),
+    prompt: getEpiloguePrompt(state),
+    output: Output.object({
+      schema: epilogueOutputSchema,
+    }),
+    abortSignal: abortController.signal,
+  });
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<EpilogueOutput>>,
+    finalOutput: result.output.then((output) => {
+      if (!output) throw new Error("No structured output received from epilogue");
+      return output as EpilogueOutput;
+    }),
+    abort: () => abortController.abort(),
+  };
 }
