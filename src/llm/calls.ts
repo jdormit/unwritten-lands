@@ -375,7 +375,7 @@ export function streamWorldGeneration(
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<WorldGeneration>>,
-    finalOutput: result.output.then((output) => {
+    finalOutput: Promise.resolve(result.output).then((output) => {
       if (!output) throw new Error("No structured output received from world generation");
       return output as WorldGeneration;
     }),
@@ -407,7 +407,7 @@ export function streamNarration(
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<NarratorOutput>>,
-    finalOutput: result.output.then((output) => {
+    finalOutput: Promise.resolve(result.output).then((output) => {
       if (!output) throw new Error("No structured output received from narrator");
       return output as NarratorOutput;
     }),
@@ -437,7 +437,7 @@ export function streamSacredTime(
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<SacredTimeOutput>>,
-    finalOutput: result.output.then((output) => {
+    finalOutput: Promise.resolve(result.output).then((output) => {
       if (!output) throw new Error("No structured output received from sacred time");
       return output as SacredTimeOutput;
     }),
@@ -468,7 +468,7 @@ export function streamConsequence(
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<ConsequenceOutput>>,
-    finalOutput: result.output.then((output) => {
+    finalOutput: Promise.resolve(result.output).then((output) => {
       if (!output) throw new Error("No structured output received from consequence");
       return output as ConsequenceOutput;
     }),
@@ -498,7 +498,7 @@ export function streamEpilogue(
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<EpilogueOutput>>,
-    finalOutput: result.output.then((output) => {
+    finalOutput: Promise.resolve(result.output).then((output) => {
       if (!output) throw new Error("No structured output received from epilogue");
       return output as EpilogueOutput;
     }),

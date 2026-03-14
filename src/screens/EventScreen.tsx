@@ -10,7 +10,6 @@ import { useGame } from "../state/game-context";
 import { LoadingState } from "../components/LoadingState";
 import { GameHeader } from "../components/GameHeader";
 import { EventNarrative } from "../components/EventNarrative";
-import { AdvisorPanel } from "../components/AdvisorPanel";
 import { ChoiceButtons } from "../components/ChoiceButtons";
 import { WorldSidebar } from "../components/WorldSidebar";
 import { saveGame } from "../persistence/save";
@@ -265,7 +264,7 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
         {hasOpinions && state.world && (
           <div className="space-y-3">
             {(displayOpinions as { advisor_name?: string; opinion?: string }[]).map(
-              (opinion, i) =>
+              (opinion, _i) =>
                 opinion?.advisor_name ? (
                   <div key={opinion.advisor_name} className="animate-fade-in">
                     <AdvisorOpinionCard
