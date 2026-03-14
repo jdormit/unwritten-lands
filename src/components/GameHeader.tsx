@@ -1,3 +1,4 @@
+import { BookOpen } from "lucide-react";
 import type { Resources, Season, ResourceKey } from "../types/game";
 import { ResourceBarGroup } from "./ResourceBar";
 
@@ -47,7 +48,7 @@ export function GameHeader({
               title="Chronicle & Lore"
               aria-label="Open chronicle and lore"
             >
-              &#x1F4DC; Lore
+              <BookOpen size={14} className="inline -mt-0.5" /> Lore
             </button>
           )}
         </div>

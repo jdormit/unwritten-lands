@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import { Users, Gem, Sparkles, Shield } from "lucide-react";
 import type { ResourceKey } from "../types/game";
+import type { LucideIcon } from "lucide-react";
 
-const RESOURCE_CONFIG: Record<ResourceKey, { label: string; color: string; icon: string }> = {
-  people: { label: "People", color: "bg-resource-people", icon: "👤" },
-  wealth: { label: "Wealth", color: "bg-resource-wealth", icon: "◆" },
-  magic: { label: "Magic", color: "bg-resource-magic", icon: "✦" },
-  reputation: { label: "Reputation", color: "bg-resource-reputation", icon: "⚐" },
+const RESOURCE_CONFIG: Record<ResourceKey, { label: string; color: string; icon: LucideIcon }> = {
+  people: { label: "People", color: "bg-resource-people", icon: Users },
+  wealth: { label: "Wealth", color: "bg-resource-wealth", icon: Gem },
+  magic: { label: "Magic", color: "bg-resource-magic", icon: Sparkles },
+  reputation: { label: "Reputation", color: "bg-resource-reputation", icon: Shield },
 };
 
 interface ResourceBarProps {
@@ -35,7 +37,9 @@ export function ResourceBar({ resource, value, previousValue }: ResourceBarProps
 
   return (
     <div className="flex items-center gap-2 relative">
-      <span className="w-6 text-center text-sm">{config.icon}</span>
+      <span className="w-6 text-center text-sm flex items-center justify-center">
+        <config.icon size={16} />
+      </span>
       <span className={`w-24 text-sm font-sans ${isLow ? "text-blood font-bold" : "text-parchment-800"}`}>
         {config.label}
       </span>

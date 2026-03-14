@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Sprout, Sun, Leaf, Snowflake, X, ChevronDown, ChevronRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type {
   WorldGeneration,
   ClanRelationship,
@@ -35,11 +37,11 @@ export function getRelationshipDisplay(score: number) {
 
 type SectionId = "chronicle" | "neighbors" | "geography" | "mythology" | "storylines" | "agreements";
 
-const SEASON_ICONS: Record<string, string> = {
-  spring: "\u{1F331}",
-  summer: "\u2600",
-  autumn: "\u{1F342}",
-  winter: "\u2744",
+const SEASON_ICONS: Record<string, LucideIcon> = {
+  spring: Sprout,
+  summer: Sun,
+  autumn: Leaf,
+  winter: Snowflake,
 };
 
 export function WorldSidebar({
@@ -93,7 +95,7 @@ export function WorldSidebar({
               transition-colors cursor-pointer text-xl leading-none"
             aria-label="Close"
           >
-            &times;
+            <X size={18} />
           </button>
         </div>
 
@@ -115,9 +117,13 @@ export function WorldSidebar({
                 <div className="space-y-2 border-l-2 border-parchment-300 pl-4 max-h-80 overflow-y-auto">
                   {eventHistory.slice().reverse().map((entry, i) => (
                     <div key={i} className="space-y-1">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xs font-sans text-parchment-500 whitespace-nowrap">
-                          {SEASON_ICONS[entry.season] ?? ""} Year {entry.year}, {entry.season}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-sans text-parchment-500 whitespace-nowrap inline-flex items-center gap-1">
+                          {(() => {
+                            const SeasonIcon = SEASON_ICONS[entry.season];
+                            return SeasonIcon ? <SeasonIcon size={12} /> : null;
+                          })()}
+                          Year {entry.year}, {entry.season}
                         </span>
                       </div>
                       <p className="text-sm font-bold text-parchment-800">
@@ -335,7 +341,9 @@ function SectionHeader({
           </span>
         )}
       </span>
-      <span className="text-parchment-500 text-xs">{isOpen ? "▼" : "▶"}</span>
+      <span className="text-parchment-500">
+        {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+      </span>
     </button>
   );
 }
