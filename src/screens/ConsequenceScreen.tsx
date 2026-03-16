@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { Auth } from "ai-sdk-codex-oauth";
 import type { DeepPartial } from "ai";
 import { streamConsequence } from "../llm/calls";
 import { useGame } from "../state/game-context";
@@ -10,11 +9,7 @@ import { WorldSidebar } from "../components/WorldSidebar";
 import { saveGame } from "../persistence/save";
 import type { ConsequenceOutput } from "../types/game";
 
-interface ConsequenceScreenProps {
-  auth: Auth;
-}
-
-export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
+export function ConsequenceScreen() {
   const { state, dispatch } = useGame();
   const [error, setError] = useState<string | null>(null);
   const [loreOpen, setLoreOpen] = useState(false);
@@ -35,7 +30,7 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
     setPartial(null);
     setComplete(null);
 
-    const stream = streamConsequence(auth, state, choiceResult);
+    const stream = streamConsequence(state, choiceResult);
     abortRef.current = stream.abort;
 
     // Consume partial stream
@@ -62,7 +57,7 @@ export function ConsequenceScreen({ auth }: ConsequenceScreenProps) {
           setError(e instanceof Error ? e.message : "The outcome is unclear...");
         }
       });
-  }, [auth, state, choiceResult, dispatch]);
+  }, [state, choiceResult, dispatch]);
 
   useEffect(() => {
     if (state.consequence || generationTriggered.current) {

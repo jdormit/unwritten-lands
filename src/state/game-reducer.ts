@@ -4,6 +4,7 @@ import type {
   GameFlag,
   WorldGeneration,
   Resources,
+  NullableResources,
   MagicAllocation,
   CurrentEvent,
   ConsequenceOutput,
@@ -88,7 +89,7 @@ function nextSeason(current: Season): { season: Season; yearAdvanced: boolean } 
 
 function applyResourceEffects(
   resources: Resources,
-  effects: Partial<Resources>,
+  effects: NullableResources,
 ): Resources {
   return {
     people: clamp((resources.people + (effects.people ?? 0)), 0, 10),
@@ -134,7 +135,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         phase: "sacred_time",
         clan_relationships: world.neighboring_clans.map((c) => ({
           clan_name: c.name,
-          score: c.initial_relationship,
+          score: clamp(c.initial_relationship, -3, 3),
         })),
         // Slight variation in starting resources based on world generation
         resources: { ...INITIAL_RESOURCES },

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { Auth } from "ai-sdk-codex-oauth";
 import type { DeepPartial } from "ai";
 import {
   generateThemeWithSeeds,
@@ -13,11 +12,7 @@ import { INITIAL_RESOURCES, initialGameState } from "../state/game-reducer";
 import { LoadingState } from "../components/LoadingState";
 import { getRelationshipDisplay } from "../components/WorldSidebar";
 
-interface WorldGenScreenProps {
-  auth: Auth;
-}
-
-export function WorldGenScreen({ auth }: WorldGenScreenProps) {
+export function WorldGenScreen() {
   const { dispatch } = useGame();
   const [error, setError] = useState<string | null>(null);
   const generationTriggered = useRef(false);
@@ -45,14 +40,14 @@ export function WorldGenScreen({ auth }: WorldGenScreenProps) {
 
     try {
       // Step 1: Generate theme
-      const themeResult = await generateThemeWithSeeds(auth);
+      const themeResult = await generateThemeWithSeeds();
       if (cancelledRef.current) return;
 
       setThemeReady(true);
       setTheme(themeResult.theme);
 
       // Step 2: Stream world generation
-      const stream = streamWorldGeneration(auth, themeResult.theme);
+      const stream = streamWorldGeneration(themeResult.theme);
       abortRef.current = stream.abort;
 
       // Consume partial stream
@@ -90,7 +85,7 @@ export function WorldGenScreen({ auth }: WorldGenScreenProps) {
           })),
         };
 
-        generateSacredTime(auth, syntheticState)
+        generateSacredTime(syntheticState)
           .then((result) => {
             if (cancelledRef.current) return;
             sacredTimeRef.current = result;
@@ -106,7 +101,7 @@ export function WorldGenScreen({ auth }: WorldGenScreenProps) {
         setError(e instanceof Error ? e.message : "World generation failed");
       }
     }
-  }, [auth, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (generationTriggered.current) return;

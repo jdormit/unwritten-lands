@@ -8,7 +8,6 @@ export type StorylineState = "introduced" | "escalating" | "climax" | "resolved"
 
 export type GamePhase =
   | "title"
-  | "authenticating"
   | "world_gen"
   | "sacred_time"
   | "event_loading"
@@ -182,11 +181,11 @@ export type PlayerActionType =
 
 export interface ActionRequirement {
   type: "min_resource" | "max_resource" | "season" | "min_relationship" | "max_relationship";
-  resource?: ResourceKey;       // for resource requirements
-  clan_name?: string;           // for relationship requirements
-  season?: Season;              // for season requirements
-  value?: number;               // threshold for resource/relationship requirements
-  unmet_hint: string;           // thematic, immersive text (no numbers)
+  resource?: ResourceKey | null;       // for resource requirements
+  clan_name?: string | null;           // for relationship requirements
+  season?: Season | null;              // for season requirements
+  value?: number | null;               // threshold for resource/relationship requirements
+  unmet_hint: string;                  // thematic, immersive text (no numbers)
 }
 
 export interface PlayerAction {
@@ -211,10 +210,17 @@ export interface UnlockedAction {
 // Director Output
 // ============================================================
 
+export interface NullableResources {
+  people: number | null;
+  wealth: number | null;
+  magic: number | null;
+  reputation: number | null;
+}
+
 export interface DirectorOption {
   summary: string;
   tone: "cautious" | "bold" | "diplomatic" | "ruthless" | "pious" | "pragmatic";
-  resource_effects: Partial<Resources>;
+  resource_effects: NullableResources;
   relationship_effects: {
     clan_name: string;
     change: number;
@@ -301,7 +307,7 @@ export interface ChoiceResult {
   event_title: string;
   chosen_option_text: string;
   chosen_option_summary: string;
-  resource_effects: Partial<Resources>;
+  resource_effects: NullableResources;
   relationship_effects: { clan_name: string; change: number }[] | null;
   previous_resources: Resources;
   new_resources: Resources;

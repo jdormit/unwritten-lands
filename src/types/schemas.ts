@@ -3,6 +3,14 @@ import { z } from "zod";
 // ============================================================
 // Zod Schemas for LLM Structured Output
 // ============================================================
+//
+// These schemas use strict Zod validators (.min, .max, .length, etc.) to
+// enforce data integrity. The AI Gateway's OpenAI-compatible API does not
+// enforce these constraints at generation time, so we rely on:
+//   1. Descriptive .describe() strings to guide the model
+//   2. A schema-aware retry mechanism (see calls.ts) that feeds validation
+//      errors back to the model for a corrective second attempt
+// ============================================================
 
 // Theme Generation Schema (pre-worldbuilding diversity seed)
 export const themeSchema = z.object({
@@ -27,7 +35,7 @@ export const worldGenerationSchema = z.object({
       name: z.string(),
       domain: z.string(),
       personality: z.string(),
-    })).describe("3-5 key deities/spirits"),
+    })).min(3).max(5).describe("3-5 key deities/spirits"),
   }),
   clan: z.object({
     name: z.string().describe("The player's clan name"),
@@ -44,15 +52,15 @@ export const worldGenerationSchema = z.object({
     name: z.string(),
     reputation: z.string().describe("e.g. 'warlike raiders', 'wealthy traders'"),
     personality: z.string(),
-    initial_relationship: z.number().min(-2).max(2).describe("Starting relationship score"),
+    initial_relationship: z.number().min(-2).max(2).describe("Starting relationship score, integer from -2 (hostile) to 2 (friendly)"),
     detail: z.string().describe("One distinguishing cultural detail"),
   })).min(3).max(4).describe("3-4 neighboring clans"),
   looming_threat: z.object({
     name: z.string(),
     description: z.string().describe("2-3 sentences describing the threat"),
     nature: z.enum(["military", "supernatural", "natural", "political"]),
-    foreshadowing_hints: z.array(z.string()).min(3).max(4).describe("Ways the threat can be hinted at early"),
-    preparation_axes: z.array(z.string()).min(2).max(4).describe("What kinds of preparation help against it"),
+    foreshadowing_hints: z.array(z.string()).min(3).max(5).describe("3-5 ways the threat can be hinted at early"),
+    preparation_axes: z.array(z.string()).min(2).max(4).describe("2-4 kinds of preparation that help against it"),
   }),
 });
 
@@ -76,14 +84,14 @@ export const directorOutputSchema = z.object({
     summary: z.string().describe("Brief description of the choice"),
     tone: z.enum(["cautious", "bold", "diplomatic", "ruthless", "pious", "pragmatic"]),
     resource_effects: z.object({
-      people: z.number().min(-2).max(2).nullable(),
-      wealth: z.number().min(-2).max(2).nullable(),
-      magic: z.number().min(-2).max(2).nullable(),
-      reputation: z.number().min(-2).max(2).nullable(),
+      people: z.number().min(-2).max(2).nullable().describe("Integer from -2 to 2, or null"),
+      wealth: z.number().min(-2).max(2).nullable().describe("Integer from -2 to 2, or null"),
+      magic: z.number().min(-2).max(2).nullable().describe("Integer from -2 to 2, or null"),
+      reputation: z.number().min(-2).max(2).nullable().describe("Integer from -2 to 2, or null"),
     }),
     relationship_effects: z.array(z.object({
       clan_name: z.string(),
-      change: z.number().min(-2).max(2),
+      change: z.number().min(-2).max(2).describe("Integer from -2 to 2"),
     })).nullable(),
     flags_added: z.array(z.object({
       flag: z.string().describe("A short snake_case identifier for the flag"),
@@ -113,7 +121,7 @@ export const narratorOutputSchema = z.object({
   advisor_opinions: z.array(z.object({
     advisor_name: z.string(),
     opinion: z.string().describe("1-2 sentences, in character"),
-  })).length(3).describe("One opinion from each advisor"),
+  })).length(3).describe("Exactly 3 opinions, one from each advisor"),
   option_texts: z.array(z.string()).length(3).describe("Exactly 3 concise imperative sentences for the options"),
 });
 

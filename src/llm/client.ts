@@ -1,15 +1,21 @@
-import { createCodexOAuth } from "ai-sdk-codex-oauth";
-import type { Auth } from "ai-sdk-codex-oauth";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-const MODEL_ID = "gpt-5.2";
+const MODEL_ID = "google/gemini-3-flash-preview";
 
 /**
- * Create a language model instance from an Auth object.
+ * OpenAI-compatible provider pointing at our Cloudflare Worker proxy.
+ * The worker injects the AI Gateway API key, so no key is needed client-side.
+ * Must use a full URL because the SDK constructs URLs via `new URL()`.
  */
-export function createModel(auth: Auth) {
-  const codex = createCodexOAuth({
-    auth,
-    originator: "unwritten-lands",
-  });
-  return codex(MODEL_ID);
+const gateway = createOpenAICompatible({
+  name: "ai-gateway",
+  baseURL: `${window.location.origin}/api/ai`,
+  supportsStructuredOutputs: true,
+});
+
+/**
+ * Create a language model instance routed through our AI Gateway proxy.
+ */
+export function createModel() {
+  return gateway.chatModel(MODEL_ID);
 }

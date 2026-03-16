@@ -2,15 +2,15 @@
 
 ## Project Overview
 
-Unwritten Lands is a browser-based narrative strategy game built with React, TypeScript, Vite, and Tailwind CSS v4. An LLM (via the Vercel AI SDK and Codex OAuth) procedurally generates world lore, events, and consequences. The player leads a clan through seasons of choices across a 10-year saga.
+Unwritten Lands is a browser-based narrative strategy game built with React, TypeScript, Vite, and Tailwind CSS v4. An LLM (via the Vercel AI SDK and the Vercel AI Gateway) procedurally generates world lore, events, and consequences. The player leads a clan through seasons of choices across a 10-year saga.
 
 ## Build / Dev / Lint Commands
 
 ```bash
-npm run dev          # Start Vite dev server on port 5173
+npm run dev          # Start Vite dev server on port 5173 (includes Cloudflare Worker)
 npm run build        # Type-check (tsc -b) then bundle with Vite
 npm run lint         # ESLint across all .ts/.tsx files
-npm run preview      # Serve the production build locally
+npm run preview      # Serve the production build locally in the Workers runtime
 ```
 
 There is no test runner configured. To verify correctness, run the full build:
@@ -19,20 +19,47 @@ There is no test runner configured. To verify correctness, run the full build:
 npm run build        # Catches both TypeScript and bundling errors
 ```
 
+### Deployment
+
+```bash
+npm exec wrangler deploy   # Deploy to Cloudflare (uses output wrangler.json from build)
+```
+
+The AI Gateway API key must be set as a secret in production:
+
+```bash
+npx wrangler secret put AI_GATEWAY_API_KEY
+```
+
+For local development, copy `.dev.vars.example` to `.dev.vars` and fill in the key.
+
 ## Tech Stack
 
-- **Runtime**: Browser (ES2022 target, DOM APIs)
+- **Runtime**: Browser (ES2022 target, DOM APIs) + Cloudflare Workers (server)
 - **Framework**: React 19 with react-dom
 - **Language**: TypeScript 5.9, strict mode
-- **Bundler**: Vite 7 with `@vitejs/plugin-react`
+- **Bundler**: Vite 7 with `@vitejs/plugin-react` and `@cloudflare/vite-plugin`
 - **Styling**: Tailwind CSS v4 (via `@tailwindcss/vite` plugin, `@import "tailwindcss"` in CSS)
-- **AI**: Vercel AI SDK (`ai` package) with `ai-sdk-codex-oauth` for auth
+- **AI**: Vercel AI SDK (`ai` package) with `@ai-sdk/openai-compatible` routed through the Vercel AI Gateway (`google/gemini-3-flash-preview`)
+- **API Proxy**: Cloudflare Worker proxies `/api/ai/*` to `https://ai-gateway.vercel.sh/v1`, injecting the API key server-side
 - **Validation**: Zod schemas for LLM structured output
 - **Icons**: Lucide React (`lucide-react`)
+
+## Architecture
+
+The app is a React SPA deployed to Cloudflare as a Worker with static assets. A Cloudflare Worker (defined in `worker/index.ts`) acts as a reverse proxy between the browser and the Vercel AI Gateway:
+
+1. **Browser** makes requests to `/api/ai/chat/completions` (same origin)
+2. **Cloudflare Worker** validates the request origin, injects the `AI_GATEWAY_API_KEY` secret, and forwards to `https://ai-gateway.vercel.sh/v1/chat/completions`
+3. **AI Gateway** routes to the configured model (`google/gemini-3-flash-preview`)
+
+This keeps the API key out of client code entirely. The worker enforces strict origin checks (Origin header, Referer header, Sec-Fetch-Site header) and CORS policy, only allowing requests from `localhost:5173` (dev) and `unwritten.land` (prod).
 
 ## Project Structure
 
 ```
+worker/
+  index.ts                 # Cloudflare Worker — AI Gateway proxy with auth & CORS
 src/
   App.tsx                  # Root component — phase-based routing via switch
   main.tsx                 # React entry point, wraps App in GameProvider
@@ -44,8 +71,7 @@ src/
     game-context.tsx       # React context + provider with useReducer
     game-reducer.ts        # Pure reducer for all game state transitions
   llm/
-    auth.ts                # OAuth flow, token caching
-    client.ts              # Model factory (createModel)
+    client.ts              # Model factory (createModel) via @ai-sdk/openai-compatible
     calls.ts               # All LLM call functions (generate* and stream*)
     prompts.ts             # System/user prompt builders
     scene-seeds.ts         # Scene seed data
@@ -56,6 +82,8 @@ src/
   screens/                 # Phase-specific screen components
   persistence/
     save.ts                # localStorage save/load with migration
+wrangler.jsonc             # Cloudflare Worker configuration (input)
+.dev.vars.example          # Template for local dev secrets
 ```
 
 ## TypeScript Configuration
@@ -67,7 +95,7 @@ Strict mode is enabled with these additional checks:
 - `verbatimModuleSyntax: true` — use `import type` for type-only imports
 - `erasableSyntaxOnly: true`
 
-The project uses project references (`tsconfig.json` references `tsconfig.app.json` and `tsconfig.node.json`). Application code targets ES2022; Vite config targets ES2023.
+The project uses project references (`tsconfig.json` references `tsconfig.app.json`, `tsconfig.node.json`, and `tsconfig.worker.json`). Application code targets ES2022; Vite/Worker config targets ES2023. Worker code uses `@cloudflare/workers-types` for Workers runtime APIs.
 
 ## Code Style & Conventions
 
@@ -127,11 +155,12 @@ The project uses project references (`tsconfig.json` references `tsconfig.app.js
 
 ### LLM Integration Patterns
 
-- `createModel(auth)` returns a configured AI model instance.
+- `createModel()` returns a configured AI model instance via `@ai-sdk/openai-compatible`, pointing at the local `/api/ai` proxy.
 - Non-streaming calls use `generateText` + `Output.object({ schema })`.
 - Streaming calls use `streamText` + `Output.object({ schema })` and return a `StreamHandle<T>` with `partialStream`, `finalOutput`, and `abort`.
 - Wrap `result.output` (which is `PromiseLike`) with `Promise.resolve()` when assigning to `StreamHandle.finalOutput`.
 - System prompts and user prompts are built by separate functions in `prompts.ts`.
+- The model ID uses AI Gateway format: `google/gemini-3-flash-preview`.
 
 ### Formatting
 
@@ -157,3 +186,5 @@ Uses flat config (`eslint.config.js`) with:
 - Unused parameters must be prefixed with `_` to satisfy `noUnusedParameters`.
 - `streamText().output` returns `PromiseLike<T>`, not `Promise<T>` — wrap with `Promise.resolve()` for `StreamHandle` compatibility.
 - The game uses snake_case for data model fields (matching JSON/LLM conventions) but camelCase for React/TS code.
+- The Cloudflare Worker proxy only allows POST requests to `/api/ai/*`. The `AI_GATEWAY_API_KEY` secret must be configured for the worker to function.
+- In local dev, create `.dev.vars` from `.dev.vars.example` with a valid AI Gateway API key.

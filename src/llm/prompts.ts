@@ -1,4 +1,4 @@
-import type { GameState, DirectorOutput, ChoiceResult } from "../types/game";
+import type { GameState, DirectorOutput, ChoiceResult, NullableResources } from "../types/game";
 import type { ThemeSeed } from "../types/schemas";
 import { pickSceneSeeds, pickActionSeeds } from "./scene-seeds";
 
@@ -414,7 +414,7 @@ RULES:
 Output valid JSON matching the requested schema exactly.`;
 }
 
-function describeResourceEffects(effects: Partial<Record<string, number | null>>): string {
+function describeResourceEffects(effects: NullableResources): string {
   const parts: string[] = [];
   for (const [key, val] of Object.entries(effects)) {
     if (val == null || val === 0) continue;

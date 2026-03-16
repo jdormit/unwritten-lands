@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { Auth } from "ai-sdk-codex-oauth";
 import type { DeepPartial } from "ai";
 import {
   generateDirectorEvent,
@@ -20,12 +19,11 @@ import type {
 } from "../types/game";
 
 interface EventScreenProps {
-  auth: Auth;
   actionType?: string;
   actionTarget?: string;
 }
 
-export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps) {
+export function EventScreen({ actionType, actionTarget }: EventScreenProps) {
   const { state, dispatch } = useGame();
   const [directorLoading, setDirectorLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,22 +52,26 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
     try {
       // Step 1: Director (blocking — not user-facing)
       const director = isPlayerAction
-        ? await generateDirectorAction(auth, state, actionType!, actionTarget)
-        : await generateDirectorEvent(auth, state);
+        ? await generateDirectorAction(state, actionType!, actionTarget)
+        : await generateDirectorEvent(state);
 
       if (cancelledRef.current) return;
       setDirectorOutput(director);
-      setDirectorLoading(false);
 
       // Step 2: Stream Narrator
-      const stream = streamNarration(auth, state, director, isPlayerAction);
+      const stream = streamNarration(state, director, isPlayerAction);
       abortRef.current = stream.abort;
 
-      // Consume partial stream
+      // Consume partial stream — hide loading state once first token arrives
       (async () => {
         try {
+          let firstToken = true;
           for await (const partial of stream.partialStream) {
             if (cancelledRef.current) return;
+            if (firstToken) {
+              setDirectorLoading(false);
+              firstToken = false;
+            }
             setPartialNarrator(partial);
           }
         } catch {
@@ -92,11 +94,11 @@ export function EventScreen({ auth, actionType, actionTarget }: EventScreenProps
       });
     } catch (e) {
       if (!cancelledRef.current) {
-        setError(e instanceof Error ? e.message : "The spirits are silent");
         setDirectorLoading(false);
+        setError(e instanceof Error ? e.message : "The spirits are silent");
       }
     }
-  }, [auth, state, dispatch, isPlayerAction, actionType, actionTarget]);
+  }, [state, dispatch, isPlayerAction, actionType, actionTarget]);
 
   // Generate event via Director → Narrator pipeline
   useEffect(() => {

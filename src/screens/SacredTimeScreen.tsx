@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { Auth } from "ai-sdk-codex-oauth";
 import type { DeepPartial } from "ai";
 import { streamSacredTime } from "../llm/calls";
 import { useGame } from "../state/game-context";
@@ -9,11 +8,7 @@ import { EventNarrative } from "../components/EventNarrative";
 import { WorldSidebar } from "../components/WorldSidebar";
 import type { MagicAllocation, SacredTimeOutput } from "../types/game";
 
-interface SacredTimeScreenProps {
-  auth: Auth;
-}
-
-export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
+export function SacredTimeScreen() {
   const { state, dispatch } = useGame();
   const [error, setError] = useState<string | null>(null);
   const [allocation, setAllocation] = useState<MagicAllocation>({
@@ -40,7 +35,7 @@ export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
     setPartial(null);
     setComplete(null);
 
-    const stream = streamSacredTime(auth, state);
+    const stream = streamSacredTime(state);
     abortRef.current = stream.abort;
 
     // Consume partial stream
@@ -67,7 +62,7 @@ export function SacredTimeScreen({ auth }: SacredTimeScreenProps) {
           setError(e instanceof Error ? e.message : "Failed to read the omens");
         }
       });
-  }, [auth, state, dispatch]);
+  }, [state, dispatch]);
 
   // Generate sacred time narrative
   useEffect(() => {

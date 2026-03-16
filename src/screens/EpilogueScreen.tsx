@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { Auth } from "ai-sdk-codex-oauth";
 import type { DeepPartial } from "ai";
 import { streamEpilogue } from "../llm/calls";
 import { useGame } from "../state/game-context";
@@ -9,7 +8,6 @@ import { deleteSave } from "../persistence/save";
 import type { EpilogueOutput } from "../types/game";
 
 interface EpilogueScreenProps {
-  auth: Auth;
   isCollapse: boolean;
 }
 
@@ -29,7 +27,7 @@ const OUTCOME_STYLES: Record<string, string> = {
   collapse: "text-blood",
 };
 
-export function EpilogueScreen({ auth, isCollapse }: EpilogueScreenProps) {
+export function EpilogueScreen({ isCollapse }: EpilogueScreenProps) {
   const { state, dispatch } = useGame();
   const [error, setError] = useState<string | null>(null);
   const generationTriggered = useRef(false);
@@ -46,7 +44,7 @@ export function EpilogueScreen({ auth, isCollapse }: EpilogueScreenProps) {
     setPartial(null);
     setComplete(null);
 
-    const stream = streamEpilogue(auth, state);
+    const stream = streamEpilogue(state);
     abortRef.current = stream.abort;
 
     // Consume partial stream
@@ -73,7 +71,7 @@ export function EpilogueScreen({ auth, isCollapse }: EpilogueScreenProps) {
           setError(e instanceof Error ? e.message : "The saga cannot be told");
         }
       });
-  }, [auth, state, dispatch]);
+  }, [state, dispatch]);
 
   useEffect(() => {
     if (state.epilogue || generationTriggered.current) {

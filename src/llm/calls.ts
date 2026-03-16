@@ -1,6 +1,6 @@
-import { generateText, streamText, Output } from "ai";
-import type { DeepPartial } from "ai";
-import type { Auth } from "ai-sdk-codex-oauth";
+import { generateText, streamText, Output, NoObjectGeneratedError } from "ai";
+import type { DeepPartial, LanguageModel } from "ai";
+import type { ZodType } from "zod";
 import {
   worldGenerationSchema,
   directorOutputSchema,
@@ -49,21 +49,112 @@ import {
 } from "./theme-seeds";
 
 // ============================================================
-// Retry helper
+// Configuration
 // ============================================================
 
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  retries = 1,
-): Promise<T> {
+/** Default temperature for all LLM calls — higher for more creative output. */
+const TEMPERATURE = 1.2;
+
+// ============================================================
+// Schema-aware retry helpers
+// ============================================================
+
+/**
+ * Format Zod validation errors into a concise, LLM-readable string.
+ */
+function formatZodErrors(error: unknown): string {
+  if (error && typeof error === "object" && "issues" in error) {
+    const issues = (error as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+    return issues
+      .map((issue) => {
+        const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+        return `- ${path}: ${issue.message}`;
+      })
+      .join("\n");
+  }
+  return String(error);
+}
+
+/**
+ * Build a retry prompt that includes the original prompt plus feedback
+ * about validation errors from the previous attempt.
+ */
+function buildRetryPrompt(originalPrompt: string, rawJson: string, validationErrors: string): string {
+  // Truncate JSON if very long to avoid exceeding context limits
+  const truncatedJson = rawJson.length > 2000
+    ? rawJson.slice(0, 2000) + "\n... [truncated]"
+    : rawJson;
+
+  return `${originalPrompt}
+
+IMPORTANT CORRECTION: Your previous response was valid JSON but FAILED schema validation. You MUST fix these specific errors in your new response:
+
+VALIDATION ERRORS:
+${validationErrors}
+
+YOUR PREVIOUS (INVALID) RESPONSE:
+${truncatedJson}
+
+Generate a corrected response that fixes ALL of the above validation errors while preserving the creative content.`;
+}
+
+/**
+ * Generate structured output with schema-aware retry.
+ *
+ * 1. First attempt uses Output.object({ schema }) for strict validation
+ * 2. If validation fails, extracts the raw text and Zod errors from the error
+ * 3. Retries with the errors fed back to the model in the prompt
+ */
+async function generateWithSchemaRetry<T>(options: {
+  model: LanguageModel;
+  system: string;
+  prompt: string;
+  schema: ZodType<T>;
+  errorLabel: string;
+}): Promise<T> {
+  const { model, system, prompt, schema, errorLabel } = options;
+
+  // First attempt
   try {
-    return await fn();
-  } catch (error) {
-    if (retries > 0) {
-      console.warn("LLM call failed, retrying...", error);
-      return withRetry(fn, retries - 1);
+    const result = await generateText({
+      model,
+      system,
+      prompt,
+      temperature: TEMPERATURE,
+      output: Output.object({ schema }),
+    });
+    return result.output;
+  } catch (firstError) {
+    // If it's not a schema validation error, just throw
+    if (!NoObjectGeneratedError.isInstance(firstError)) {
+      throw firstError;
     }
-    throw error;
+
+    const rawText = firstError.text ?? "";
+    const validationErrors = formatZodErrors(firstError.cause);
+    console.warn(
+      `${errorLabel}: schema validation failed, retrying with feedback.\nErrors:\n${validationErrors}`,
+    );
+
+    // Second attempt with error feedback
+    try {
+      const retryResult = await generateText({
+        model,
+        system,
+        prompt: buildRetryPrompt(prompt, rawText, validationErrors),
+        temperature: TEMPERATURE,
+        output: Output.object({ schema }),
+      });
+      return retryResult.output;
+    } catch (retryError) {
+      if (NoObjectGeneratedError.isInstance(retryError)) {
+        const retryValidationErrors = formatZodErrors(retryError.cause);
+        throw new Error(
+          `${errorLabel}: schema validation failed after retry.\nErrors:\n${retryValidationErrors}`,
+        );
+      }
+      throw retryError;
+    }
   }
 }
 
@@ -80,6 +171,64 @@ export interface StreamHandle<T> {
   abort: () => void;
 }
 
+/**
+ * Stream structured output with schema-aware retry on final validation.
+ *
+ * Streams partial output for the UI, then validates the final result.
+ * If validation fails, falls back to a non-streaming retry with error feedback.
+ */
+function streamWithSchemaRetry<T>(options: {
+  model: LanguageModel;
+  system: string;
+  prompt: string;
+  schema: ZodType<T>;
+  errorLabel: string;
+  abortController: AbortController;
+}): StreamHandle<T> {
+  const { model, system, prompt, schema, errorLabel, abortController } = options;
+
+  const result = streamText({
+    model,
+    system,
+    prompt,
+    temperature: TEMPERATURE,
+    output: Output.object({ schema }),
+    abortSignal: abortController.signal,
+  });
+
+  const finalOutput = (async (): Promise<T> => {
+    try {
+      const output = await result.output;
+      return output as T;
+    } catch (firstError) {
+      // If aborted or not a schema error, just throw
+      if (abortController.signal.aborted) throw firstError;
+      if (!NoObjectGeneratedError.isInstance(firstError)) throw firstError;
+
+      const rawText = firstError.text ?? "";
+      const validationErrors = formatZodErrors(firstError.cause);
+      console.warn(
+        `${errorLabel}: stream schema validation failed, retrying with feedback.\nErrors:\n${validationErrors}`,
+      );
+
+      // Non-streaming retry with error feedback
+      return generateWithSchemaRetry({
+        model,
+        system,
+        prompt: buildRetryPrompt(prompt, rawText, validationErrors),
+        schema,
+        errorLabel: `${errorLabel} (stream retry)`,
+      });
+    }
+  })();
+
+  return {
+    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<T>>,
+    finalOutput,
+    abort: () => abortController.abort(),
+  };
+}
+
 // ============================================================
 // Theme Generation (pre-worldbuilding diversity seed)
 // ============================================================
@@ -92,29 +241,18 @@ export function getThemeSeeds() {
   };
 }
 
-async function generateTheme(auth: Auth): Promise<ThemeSeed> {
-  const model = createModel(auth);
-
-  // Randomly sample one seed from each list for combinatorial variety
+async function generateTheme(): Promise<ThemeSeed> {
+  const model = createModel();
   const terrain = pickRandom(TERRAIN_SEEDS);
   const culture = pickRandom(CULTURE_SEEDS);
   const mythicTone = pickRandom(MYTHIC_TONE_SEEDS);
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: THEME_GEN_SYSTEM,
-      prompt: buildThemeGenPrompt(terrain, culture, mythicTone),
-      output: Output.object({
-        schema: themeSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from theme generation");
-    }
-
-    return output as ThemeSeed;
+  return generateWithSchemaRetry({
+    model,
+    system: THEME_GEN_SYSTEM,
+    prompt: buildThemeGenPrompt(terrain, culture, mythicTone),
+    schema: themeSchema,
+    errorLabel: "Theme generation",
   });
 }
 
@@ -122,27 +260,16 @@ async function generateTheme(auth: Auth): Promise<ThemeSeed> {
 // World Generation
 // ============================================================
 
-export async function generateWorld(auth: Auth): Promise<WorldGeneration> {
-  const model = createModel(auth);
+export async function generateWorld(): Promise<WorldGeneration> {
+  const model = createModel();
+  const theme = await generateTheme();
 
-  // First, generate a theme seed to anchor the world on a diverse setting
-  const theme = await generateTheme(auth);
-
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: WORLD_GEN_SYSTEM,
-      prompt: buildWorldGenPrompt(theme),
-      output: Output.object({
-        schema: worldGenerationSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from world generation");
-    }
-
-    return output as WorldGeneration;
+  return generateWithSchemaRetry({
+    model,
+    system: WORLD_GEN_SYSTEM,
+    prompt: buildWorldGenPrompt(theme),
+    schema: worldGenerationSchema,
+    errorLabel: "World generation",
   });
 }
 
@@ -151,26 +278,16 @@ export async function generateWorld(auth: Auth): Promise<WorldGeneration> {
 // ============================================================
 
 export async function generateDirectorEvent(
-  auth: Auth,
   state: GameState,
 ): Promise<DirectorOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getDirectorSystemPrompt(state),
-      prompt: getDirectorEventPrompt(state),
-      output: Output.object({
-        schema: directorOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from director");
-    }
-
-    return output as DirectorOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getDirectorSystemPrompt(state),
+    prompt: getDirectorEventPrompt(state),
+    schema: directorOutputSchema,
+    errorLabel: "Director event",
   });
 }
 
@@ -179,28 +296,18 @@ export async function generateDirectorEvent(
 // ============================================================
 
 export async function generateDirectorAction(
-  auth: Auth,
   state: GameState,
   actionType: string,
   targetClan?: string,
 ): Promise<DirectorOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getDirectorSystemPrompt(state),
-      prompt: getDirectorActionPrompt(state, actionType, targetClan),
-      output: Output.object({
-        schema: directorOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from director (action)");
-    }
-
-    return output as DirectorOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getDirectorSystemPrompt(state),
+    prompt: getDirectorActionPrompt(state, actionType, targetClan),
+    schema: directorOutputSchema,
+    errorLabel: "Director action",
   });
 }
 
@@ -209,28 +316,18 @@ export async function generateDirectorAction(
 // ============================================================
 
 export async function generateNarration(
-  auth: Auth,
   state: GameState,
   directorOutput: DirectorOutput,
   isPlayerAction: boolean,
 ): Promise<NarratorOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getNarratorSystemPrompt(state),
-      prompt: getNarratorPrompt(directorOutput, isPlayerAction),
-      output: Output.object({
-        schema: narratorOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from narrator");
-    }
-
-    return output as NarratorOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getNarratorSystemPrompt(state),
+    prompt: getNarratorPrompt(directorOutput, isPlayerAction),
+    schema: narratorOutputSchema,
+    errorLabel: "Narrator",
   });
 }
 
@@ -239,26 +336,16 @@ export async function generateNarration(
 // ============================================================
 
 export async function generateSacredTime(
-  auth: Auth,
   state: GameState,
 ): Promise<SacredTimeOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getSacredTimeSystemPrompt(state),
-      prompt: getSacredTimePrompt(state),
-      output: Output.object({
-        schema: sacredTimeOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from sacred time");
-    }
-
-    return output as SacredTimeOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getSacredTimeSystemPrompt(state),
+    prompt: getSacredTimePrompt(state),
+    schema: sacredTimeOutputSchema,
+    errorLabel: "Sacred time",
   });
 }
 
@@ -267,27 +354,17 @@ export async function generateSacredTime(
 // ============================================================
 
 export async function generateConsequence(
-  auth: Auth,
   state: GameState,
   choiceResult: ChoiceResult,
 ): Promise<ConsequenceOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getConsequenceSystemPrompt(state),
-      prompt: getConsequencePrompt(choiceResult),
-      output: Output.object({
-        schema: consequenceOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from consequence narrator");
-    }
-
-    return output as ConsequenceOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getConsequenceSystemPrompt(state),
+    prompt: getConsequencePrompt(choiceResult),
+    schema: consequenceOutputSchema,
+    errorLabel: "Consequence",
   });
 }
 
@@ -296,26 +373,16 @@ export async function generateConsequence(
 // ============================================================
 
 export async function generateEpilogue(
-  auth: Auth,
   state: GameState,
 ): Promise<EpilogueOutput> {
-  const model = createModel(auth);
+  const model = createModel();
 
-  return withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: getEpilogueSystemPrompt(state),
-      prompt: getEpiloguePrompt(state),
-      output: Output.object({
-        schema: epilogueOutputSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from epilogue");
-    }
-
-    return output as EpilogueOutput;
+  return generateWithSchemaRetry({
+    model,
+    system: getEpilogueSystemPrompt(state),
+    prompt: getEpiloguePrompt(state),
+    schema: epilogueOutputSchema,
+    errorLabel: "Epilogue",
   });
 }
 
@@ -327,27 +394,19 @@ export async function generateEpilogue(
  * Generate theme with seeds exposed for display.
  * Returns the seeds used and the theme result.
  */
-export async function generateThemeWithSeeds(
-  auth: Auth,
-): Promise<{ seeds: { terrain: string; culture: string; mythicTone: string }; theme: ThemeSeed }> {
-  const model = createModel(auth);
+export async function generateThemeWithSeeds(): Promise<{
+  seeds: { terrain: string; culture: string; mythicTone: string };
+  theme: ThemeSeed;
+}> {
+  const model = createModel();
   const seeds = getThemeSeeds();
 
-  const theme = await withRetry(async () => {
-    const { output } = await generateText({
-      model,
-      system: THEME_GEN_SYSTEM,
-      prompt: buildThemeGenPrompt(seeds.terrain, seeds.culture, seeds.mythicTone),
-      output: Output.object({
-        schema: themeSchema,
-      }),
-    });
-
-    if (!output) {
-      throw new Error("No structured output received from theme generation");
-    }
-
-    return output as ThemeSeed;
+  const theme = await generateWithSchemaRetry({
+    model,
+    system: THEME_GEN_SYSTEM,
+    prompt: buildThemeGenPrompt(seeds.terrain, seeds.culture, seeds.mythicTone),
+    schema: themeSchema,
+    errorLabel: "Theme generation (with seeds)",
   });
 
   return { seeds, theme };
@@ -357,151 +416,81 @@ export async function generateThemeWithSeeds(
  * Stream world generation, yielding partial objects as they arrive.
  */
 export function streamWorldGeneration(
-  auth: Auth,
   theme: ThemeSeed,
 ): StreamHandle<WorldGeneration> {
-  const model = createModel(auth);
-  const abortController = new AbortController();
-
-  const result = streamText({
-    model,
+  return streamWithSchemaRetry({
+    model: createModel(),
     system: WORLD_GEN_SYSTEM,
     prompt: buildWorldGenPrompt(theme),
-    output: Output.object({
-      schema: worldGenerationSchema,
-    }),
-    abortSignal: abortController.signal,
+    schema: worldGenerationSchema,
+    errorLabel: "World generation (stream)",
+    abortController: new AbortController(),
   });
-
-  return {
-    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<WorldGeneration>>,
-    finalOutput: Promise.resolve(result.output).then((output) => {
-      if (!output) throw new Error("No structured output received from world generation");
-      return output as WorldGeneration;
-    }),
-    abort: () => abortController.abort(),
-  };
 }
 
 /**
  * Stream narrator output, yielding partial objects as they arrive.
  */
 export function streamNarration(
-  auth: Auth,
   state: GameState,
   directorOutput: DirectorOutput,
   isPlayerAction: boolean,
 ): StreamHandle<NarratorOutput> {
-  const model = createModel(auth);
-  const abortController = new AbortController();
-
-  const result = streamText({
-    model,
+  return streamWithSchemaRetry({
+    model: createModel(),
     system: getNarratorSystemPrompt(state),
     prompt: getNarratorPrompt(directorOutput, isPlayerAction),
-    output: Output.object({
-      schema: narratorOutputSchema,
-    }),
-    abortSignal: abortController.signal,
+    schema: narratorOutputSchema,
+    errorLabel: "Narrator (stream)",
+    abortController: new AbortController(),
   });
-
-  return {
-    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<NarratorOutput>>,
-    finalOutput: Promise.resolve(result.output).then((output) => {
-      if (!output) throw new Error("No structured output received from narrator");
-      return output as NarratorOutput;
-    }),
-    abort: () => abortController.abort(),
-  };
 }
 
 /**
  * Stream sacred time output.
  */
 export function streamSacredTime(
-  auth: Auth,
   state: GameState,
 ): StreamHandle<SacredTimeOutput> {
-  const model = createModel(auth);
-  const abortController = new AbortController();
-
-  const result = streamText({
-    model,
+  return streamWithSchemaRetry({
+    model: createModel(),
     system: getSacredTimeSystemPrompt(state),
     prompt: getSacredTimePrompt(state),
-    output: Output.object({
-      schema: sacredTimeOutputSchema,
-    }),
-    abortSignal: abortController.signal,
+    schema: sacredTimeOutputSchema,
+    errorLabel: "Sacred time (stream)",
+    abortController: new AbortController(),
   });
-
-  return {
-    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<SacredTimeOutput>>,
-    finalOutput: Promise.resolve(result.output).then((output) => {
-      if (!output) throw new Error("No structured output received from sacred time");
-      return output as SacredTimeOutput;
-    }),
-    abort: () => abortController.abort(),
-  };
 }
 
 /**
  * Stream consequence output.
  */
 export function streamConsequence(
-  auth: Auth,
   state: GameState,
   choiceResult: ChoiceResult,
 ): StreamHandle<ConsequenceOutput> {
-  const model = createModel(auth);
-  const abortController = new AbortController();
-
-  const result = streamText({
-    model,
+  return streamWithSchemaRetry({
+    model: createModel(),
     system: getConsequenceSystemPrompt(state),
     prompt: getConsequencePrompt(choiceResult),
-    output: Output.object({
-      schema: consequenceOutputSchema,
-    }),
-    abortSignal: abortController.signal,
+    schema: consequenceOutputSchema,
+    errorLabel: "Consequence (stream)",
+    abortController: new AbortController(),
   });
-
-  return {
-    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<ConsequenceOutput>>,
-    finalOutput: Promise.resolve(result.output).then((output) => {
-      if (!output) throw new Error("No structured output received from consequence");
-      return output as ConsequenceOutput;
-    }),
-    abort: () => abortController.abort(),
-  };
 }
 
 /**
  * Stream epilogue output.
  */
 export function streamEpilogue(
-  auth: Auth,
   state: GameState,
 ): StreamHandle<EpilogueOutput> {
-  const model = createModel(auth);
-  const abortController = new AbortController();
-
-  const result = streamText({
-    model,
+  return streamWithSchemaRetry({
+    model: createModel(),
     system: getEpilogueSystemPrompt(state),
     prompt: getEpiloguePrompt(state),
-    output: Output.object({
-      schema: epilogueOutputSchema,
-    }),
-    abortSignal: abortController.signal,
+    schema: epilogueOutputSchema,
+    errorLabel: "Epilogue (stream)",
+    abortController: new AbortController(),
   });
-
-  return {
-    partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<EpilogueOutput>>,
-    finalOutput: Promise.resolve(result.output).then((output) => {
-      if (!output) throw new Error("No structured output received from epilogue");
-      return output as EpilogueOutput;
-    }),
-    abort: () => abortController.abort(),
-  };
 }
