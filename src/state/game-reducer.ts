@@ -204,12 +204,35 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       // Update unlocked actions
       let newUnlockedActions = [...state.unlocked_actions];
+
+      // Remove single-use action if this was a player-initiated custom action
+      if (isPlayerAction && state.current_event?.actionLabel) {
+        const usedLabel = state.current_event.actionLabel;
+        const usedAction = newUnlockedActions.find(
+          (a) => a.label === usedLabel && a.single_use,
+        );
+        if (usedAction) {
+          newUnlockedActions = newUnlockedActions.filter((a) => a !== usedAction);
+        }
+      }
+
+      // Remove actions linked to flags that are being removed
+      if (option.flags_removed && option.flags_removed.length > 0) {
+        newUnlockedActions = newUnlockedActions.filter(
+          (a) => !option.flags_removed!.includes(a.from_flag),
+        );
+      }
+
       if (option.unlocks_action) {
+        // Link the action to the first flag added by this option (if any),
+        // so the action is cleaned up when that flag is later removed
+        const linkedFlag = option.flags_added?.[0]?.flag ?? option.unlocks_action.type;
         const ua: UnlockedAction = {
           type: option.unlocks_action.type,
           label: option.unlocks_action.label,
           description: option.unlocks_action.description,
-          from_flag: option.unlocks_action.type,
+          from_flag: linkedFlag,
+          single_use: option.unlocks_action.single_use ?? false,
           requirements: option.unlocks_action.requirements ?? undefined,
         };
         if (!newUnlockedActions.some((a) => a.type === ua.type)) {

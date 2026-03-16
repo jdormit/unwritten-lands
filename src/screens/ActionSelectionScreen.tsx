@@ -6,7 +6,7 @@ import { WorldSidebar, getRelationshipDisplay } from "../components/WorldSidebar
 import type { PlayerAction } from "../types/game";
 
 interface ActionSelectionScreenProps {
-  onSelectAction: (actionType: string, targetClan?: string) => void;
+  onSelectAction: (actionType: string, label: string, description: string, targetClan?: string) => void;
   onSkip: () => void;
 }
 
@@ -27,13 +27,13 @@ export function ActionSelectionScreen({
       setSelectedAction(action);
       setSelectedTarget(null);
     } else {
-      onSelectAction(action.type);
+      onSelectAction(action.type, action.label, action.description ?? action.label);
     }
   }
 
   function handleTargetSelect(target: string) {
     if (selectedAction) {
-      onSelectAction(selectedAction.type, target);
+      onSelectAction(selectedAction.type, selectedAction.label, selectedAction.description ?? selectedAction.label, target);
     }
   }
 

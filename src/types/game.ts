@@ -203,6 +203,7 @@ export interface UnlockedAction {
   label: string;
   description: string;
   from_flag: string;
+  single_use?: boolean;
   requirements?: ActionRequirement[];
 }
 
@@ -231,6 +232,7 @@ export interface DirectorOption {
     type: string;
     label: string;
     description: string;
+    single_use?: boolean | null;
     requirements?: ActionRequirement[] | null;
   } | null;
 }
@@ -324,6 +326,7 @@ export interface CurrentEvent {
   director: DirectorOutput;
   narrator: NarratorOutput;
   isPlayerAction: boolean;
+  actionLabel?: string;
 }
 
 // ============================================================

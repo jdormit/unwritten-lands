@@ -124,8 +124,14 @@ FLAG RULES:
 - flags_added entries must include a short snake_case "flag" id and a "description" that is a brief, player-readable sentence explaining what it represents (e.g. flag: "elk_clan_owes_favor", description: "The Elk Clan owes you a favor for your aid")
 - flags_removed should reference existing flag ids
 
-UNLOCKED ACTION REQUIREMENTS:
-When an option unlocks a new player action (unlocks_action), you MAY attach requirements that must ALL be met before the player can use that action. Requirements are optional — only add them when it makes thematic sense for the action to require certain conditions. Many unlocked actions should have NO requirements at all (set requirements to null).
+UNLOCKED ACTION RULES:
+When an option unlocks a new player action (unlocks_action), consider:
+
+single_use: Set to true for one-off opportunities that don't make sense to repeat — "Explore the collapsed mine", "Confront the traitor", "Open the sealed tomb". Set to false/null for ongoing capabilities — "Trade with the River Clan's secret market", "Consult the oracle". Most actions that arise from a specific event should be single_use. Actions that represent a lasting capability or relationship should persist.
+
+Flag linking: When an option BOTH adds a flag AND unlocks an action, the action is automatically linked to that flag. If the flag is later removed (by a future event's flags_removed), the linked action is also removed. This is useful for actions that should only be available while a narrative condition holds — e.g. a flag "river_clan_owes_favor" could be linked to an action "Call in the River Clan's debt", and both disappear when the favor is used or the relationship sours. To take advantage of this, make sure the same option that unlocks the action also adds a relevant flag.
+
+Requirements: You MAY attach requirements that must ALL be met before the player can use the action. Requirements are optional — only add them when it makes thematic sense. Many unlocked actions should have NO requirements at all (set requirements to null).
 
 Available requirement types:
 - min_resource / max_resource: Requires a resource (people, wealth, magic, reputation) to be at or above/below a threshold (1-9). Use when the action logically demands or is incompatible with certain resource levels.
@@ -167,16 +173,29 @@ CREATIVE SEEDS (interpret freely):
 function buildDirectorPromptForAction(
   _state: GameState,
   actionType: string,
+  actionLabel: string,
+  actionDescription: string,
   targetClan?: string,
 ): string {
   const targetStr = targetClan ? ` targeting ${targetClan}` : "";
   const seeds = pickActionSeeds();
-  return `The player has chosen to initiate a "${actionType}" action${targetStr}. Generate an event that represents this action's scenario. The event should present the situation and give the player 3 options for HOW to carry it out. Keep it shorter and more focused than a regular seasonal event — this is a player-initiated vignette.
+  return `The player has chosen to initiate the following action${targetStr}:
 
-Action context:
-- Action: ${actionType}${targetStr}
+Action: "${actionLabel}"
+Description: ${actionDescription}
+Action type: ${actionType}${targetStr}
+
+Generate an event that represents this specific action's scenario. The event MUST directly correspond to what the player chose to do — "${actionLabel}". The event should present the situation and give the player 3 options for HOW to carry it out. Keep it shorter and more focused than a regular seasonal event — this is a player-initiated vignette.
+
 - This is a player-initiated action, not a random event
 - The event should feel like the player is taking initiative, not reacting
+- The event's situation must clearly stem from the action described above
+
+STORYLINE INTEGRATION:
+- If this action naturally connects to an active storyline, reference and advance it
+- If this action could plausibly spark a new storyline (e.g. a raid gone wrong, a discovery while exploring, a diplomatic overture that opens a new chapter), you MAY introduce one
+- Not every player action needs to touch storylines — only do so when it feels organic
+- All storyline rules from the system prompt still apply (cap of 4-5 active, resolve old ones before adding new)
 
 CREATIVE SEEDS (interpret freely — the situation is defined by the player's action):
 - Tension: "${seeds.tension}"
@@ -194,9 +213,11 @@ export function getDirectorEventPrompt(state: GameState): string {
 export function getDirectorActionPrompt(
   state: GameState,
   actionType: string,
+  actionLabel: string,
+  actionDescription: string,
   targetClan?: string,
 ): string {
-  return buildDirectorPromptForAction(state, actionType, targetClan);
+  return buildDirectorPromptForAction(state, actionType, actionLabel, actionDescription, targetClan);
 }
 
 // ============================================================

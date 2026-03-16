@@ -13,6 +13,8 @@ function App() {
   const { state, dispatch } = useGame();
   const [pendingAction, setPendingAction] = useState<{
     type: string;
+    label: string;
+    description: string;
     target?: string;
   } | null>(null);
 
@@ -32,8 +34,8 @@ function App() {
 
   // Handle action selection
   const handleSelectAction = useCallback(
-    (actionType: string, targetClan?: string) => {
-      setPendingAction({ type: actionType, target: targetClan });
+    (actionType: string, label: string, description: string, targetClan?: string) => {
+      setPendingAction({ type: actionType, label, description, target: targetClan });
       dispatch({ type: "SET_PHASE", phase: "action_loading" });
     },
     [dispatch],
@@ -93,6 +95,8 @@ function App() {
         <EventScreen
           key={`action-${state.current_year}-${state.current_season}`}
           actionType={pendingAction?.type}
+          actionLabel={pendingAction?.label}
+          actionDescription={pendingAction?.description}
           actionTarget={pendingAction?.target}
         />
       );

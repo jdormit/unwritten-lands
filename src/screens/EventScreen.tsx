@@ -20,10 +20,12 @@ import type {
 
 interface EventScreenProps {
   actionType?: string;
+  actionLabel?: string;
+  actionDescription?: string;
   actionTarget?: string;
 }
 
-export function EventScreen({ actionType, actionTarget }: EventScreenProps) {
+export function EventScreen({ actionType, actionLabel, actionDescription, actionTarget }: EventScreenProps) {
   const { state, dispatch } = useGame();
   const [directorLoading, setDirectorLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function EventScreen({ actionType, actionTarget }: EventScreenProps) {
     try {
       // Step 1: Director (blocking — not user-facing)
       const director = isPlayerAction
-        ? await generateDirectorAction(state, actionType!, actionTarget)
+        ? await generateDirectorAction(state, actionType!, actionLabel!, actionDescription!, actionTarget)
         : await generateDirectorEvent(state);
 
       if (cancelledRef.current) return;
@@ -90,6 +92,7 @@ export function EventScreen({ actionType, actionTarget }: EventScreenProps) {
           director,
           narrator,
           isPlayerAction,
+          actionLabel,
         },
       });
     } catch (e) {
@@ -98,7 +101,7 @@ export function EventScreen({ actionType, actionTarget }: EventScreenProps) {
         setError(e instanceof Error ? e.message : "The spirits are silent");
       }
     }
-  }, [state, dispatch, isPlayerAction, actionType, actionTarget]);
+  }, [state, dispatch, isPlayerAction, actionType, actionLabel, actionDescription, actionTarget]);
 
   // Generate event via Director → Narrator pipeline
   useEffect(() => {

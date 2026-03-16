@@ -102,6 +102,7 @@ export const directorOutputSchema = z.object({
       type: z.string(),
       label: z.string(),
       description: z.string(),
+      single_use: z.boolean().nullable().describe("If true, this action disappears after the player uses it once. Use for one-off opportunities (e.g. 'Explore the collapsed mine', 'Confront the traitor'). If false/null, the action persists."),
       requirements: z.array(z.object({
         type: z.enum(["min_resource", "max_resource", "season", "min_relationship", "max_relationship"]),
         resource: z.enum(["people", "wealth", "magic", "reputation"]).nullable().describe("Required for min_resource/max_resource types"),

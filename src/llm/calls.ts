@@ -298,6 +298,8 @@ export async function generateDirectorEvent(
 export async function generateDirectorAction(
   state: GameState,
   actionType: string,
+  actionLabel: string,
+  actionDescription: string,
   targetClan?: string,
 ): Promise<DirectorOutput> {
   const model = createModel();
@@ -305,7 +307,7 @@ export async function generateDirectorAction(
   return generateWithSchemaRetry({
     model,
     system: getDirectorSystemPrompt(state),
-    prompt: getDirectorActionPrompt(state, actionType, targetClan),
+    prompt: getDirectorActionPrompt(state, actionType, actionLabel, actionDescription, targetClan),
     schema: directorOutputSchema,
     errorLabel: "Director action",
   });
