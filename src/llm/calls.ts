@@ -49,13 +49,6 @@ import {
 } from "./theme-seeds";
 
 // ============================================================
-// Configuration
-// ============================================================
-
-/** Default temperature for all LLM calls — higher for more creative output. */
-const TEMPERATURE = 1.2;
-
-// ============================================================
 // Schema-aware retry helpers
 // ============================================================
 
@@ -120,7 +113,6 @@ async function generateWithSchemaRetry<T>(options: {
       model,
       system,
       prompt,
-      temperature: TEMPERATURE,
       output: Output.object({ schema }),
     });
     return result.output;
@@ -142,7 +134,6 @@ async function generateWithSchemaRetry<T>(options: {
         model,
         system,
         prompt: buildRetryPrompt(prompt, rawText, validationErrors),
-        temperature: TEMPERATURE,
         output: Output.object({ schema }),
       });
       return retryResult.output;
@@ -191,7 +182,6 @@ function streamWithSchemaRetry<T>(options: {
     model,
     system,
     prompt,
-    temperature: TEMPERATURE,
     output: Output.object({ schema }),
     abortSignal: abortController.signal,
   });
@@ -242,7 +232,7 @@ export function getThemeSeeds() {
 }
 
 async function generateTheme(): Promise<ThemeSeed> {
-  const model = createModel();
+  const model = createModel("storytelling");
   const terrain = pickRandom(TERRAIN_SEEDS);
   const culture = pickRandom(CULTURE_SEEDS);
   const mythicTone = pickRandom(MYTHIC_TONE_SEEDS);
@@ -261,7 +251,7 @@ async function generateTheme(): Promise<ThemeSeed> {
 // ============================================================
 
 export async function generateWorld(): Promise<WorldGeneration> {
-  const model = createModel();
+  const model = createModel("storytelling");
   const theme = await generateTheme();
 
   return generateWithSchemaRetry({
@@ -280,7 +270,7 @@ export async function generateWorld(): Promise<WorldGeneration> {
 export async function generateDirectorEvent(
   state: GameState,
 ): Promise<DirectorOutput> {
-  const model = createModel();
+  const model = createModel("director");
 
   return generateWithSchemaRetry({
     model,
@@ -302,7 +292,7 @@ export async function generateDirectorAction(
   actionDescription: string,
   targetClan?: string,
 ): Promise<DirectorOutput> {
-  const model = createModel();
+  const model = createModel("director");
 
   return generateWithSchemaRetry({
     model,
@@ -322,7 +312,7 @@ export async function generateNarration(
   directorOutput: DirectorOutput,
   isPlayerAction: boolean,
 ): Promise<NarratorOutput> {
-  const model = createModel();
+  const model = createModel("storytelling");
 
   return generateWithSchemaRetry({
     model,
@@ -340,7 +330,7 @@ export async function generateNarration(
 export async function generateSacredTime(
   state: GameState,
 ): Promise<SacredTimeOutput> {
-  const model = createModel();
+  const model = createModel("storytelling");
 
   return generateWithSchemaRetry({
     model,
@@ -359,7 +349,7 @@ export async function generateConsequence(
   state: GameState,
   choiceResult: ChoiceResult,
 ): Promise<ConsequenceOutput> {
-  const model = createModel();
+  const model = createModel("storytelling");
 
   return generateWithSchemaRetry({
     model,
@@ -377,7 +367,7 @@ export async function generateConsequence(
 export async function generateEpilogue(
   state: GameState,
 ): Promise<EpilogueOutput> {
-  const model = createModel();
+  const model = createModel("storytelling");
 
   return generateWithSchemaRetry({
     model,
@@ -400,7 +390,7 @@ export async function generateThemeWithSeeds(): Promise<{
   seeds: { terrain: string; culture: string; mythicTone: string };
   theme: ThemeSeed;
 }> {
-  const model = createModel();
+  const model = createModel("storytelling");
   const seeds = getThemeSeeds();
 
   const theme = await generateWithSchemaRetry({
@@ -421,7 +411,7 @@ export function streamWorldGeneration(
   theme: ThemeSeed,
 ): StreamHandle<WorldGeneration> {
   return streamWithSchemaRetry({
-    model: createModel(),
+    model: createModel("storytelling"),
     system: WORLD_GEN_SYSTEM,
     prompt: buildWorldGenPrompt(theme),
     schema: worldGenerationSchema,
@@ -439,7 +429,7 @@ export function streamNarration(
   isPlayerAction: boolean,
 ): StreamHandle<NarratorOutput> {
   return streamWithSchemaRetry({
-    model: createModel(),
+    model: createModel("storytelling"),
     system: getNarratorSystemPrompt(state),
     prompt: getNarratorPrompt(directorOutput, isPlayerAction),
     schema: narratorOutputSchema,
@@ -455,7 +445,7 @@ export function streamSacredTime(
   state: GameState,
 ): StreamHandle<SacredTimeOutput> {
   return streamWithSchemaRetry({
-    model: createModel(),
+    model: createModel("storytelling"),
     system: getSacredTimeSystemPrompt(state),
     prompt: getSacredTimePrompt(state),
     schema: sacredTimeOutputSchema,
@@ -472,7 +462,7 @@ export function streamConsequence(
   choiceResult: ChoiceResult,
 ): StreamHandle<ConsequenceOutput> {
   return streamWithSchemaRetry({
-    model: createModel(),
+    model: createModel("storytelling"),
     system: getConsequenceSystemPrompt(state),
     prompt: getConsequencePrompt(choiceResult),
     schema: consequenceOutputSchema,
@@ -488,7 +478,7 @@ export function streamEpilogue(
   state: GameState,
 ): StreamHandle<EpilogueOutput> {
   return streamWithSchemaRetry({
-    model: createModel(),
+    model: createModel("storytelling"),
     system: getEpilogueSystemPrompt(state),
     prompt: getEpiloguePrompt(state),
     schema: epilogueOutputSchema,

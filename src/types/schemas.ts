@@ -5,8 +5,8 @@ import { z } from "zod";
 // ============================================================
 //
 // These schemas use strict Zod validators (.min, .max, .length, etc.) to
-// enforce data integrity. The AI Gateway's OpenAI-compatible API does not
-// enforce these constraints at generation time, so we rely on:
+// enforce data integrity. Providers may not enforce every constraint at
+// generation time, so we rely on:
 //   1. Descriptive .describe() strings to guide the model
 //   2. A schema-aware retry mechanism (see calls.ts) that feeds validation
 //      errors back to the model for a corrective second attempt

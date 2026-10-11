@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Unwritten Lands is a browser-based narrative strategy game built with React, TypeScript, Vite, and Tailwind CSS v4. An LLM (via the Vercel AI SDK and the Vercel AI Gateway) procedurally generates world lore, events, and consequences. The player leads a clan through seasons of choices across a 10-year saga.
+Unwritten Lands is a browser-based narrative strategy game built with React, TypeScript, Vite, and Tailwind CSS v4. An LLM (via the Vercel AI SDK and OpenRouter) procedurally generates world lore, events, and consequences. The player leads a clan through seasons of choices across a 10-year saga.
 
 ## Build / Dev / Lint Commands
 
@@ -25,10 +25,10 @@ npm run build        # Catches both TypeScript and bundling errors
 npm exec wrangler deploy   # Deploy to Cloudflare (uses output wrangler.json from build)
 ```
 
-The AI Gateway API key must be set as a secret in production:
+The OpenRouter API key must be set as a secret in production:
 
 ```bash
-npx wrangler secret put AI_GATEWAY_API_KEY
+npx wrangler secret put OPENROUTER_API_KEY
 ```
 
 For local development, copy `.dev.vars.example` to `.dev.vars` and fill in the key.
@@ -40,18 +40,18 @@ For local development, copy `.dev.vars.example` to `.dev.vars` and fill in the k
 - **Language**: TypeScript 5.9, strict mode
 - **Bundler**: Vite 7 with `@vitejs/plugin-react` and `@cloudflare/vite-plugin`
 - **Styling**: Tailwind CSS v4 (via `@tailwindcss/vite` plugin, `@import "tailwindcss"` in CSS)
-- **AI**: Vercel AI SDK (`ai` package) with `@ai-sdk/openai-compatible` routed through the Vercel AI Gateway (`google/gemini-3-flash-preview`)
-- **API Proxy**: Cloudflare Worker proxies `/api/ai/*` to `https://ai-gateway.vercel.sh/v1`, injecting the API key server-side
+- **AI**: Vercel AI SDK (`ai` package) with `@ai-sdk/openai-compatible` routed through OpenRouter; GPT-6 Luna for Director decisions and Muse Glimmer 30B for storytelling
+- **API Proxy**: Cloudflare Worker proxies `/api/ai/*` to `https://openrouter.ai/api/v1`, injecting the API key server-side
 - **Validation**: Zod schemas for LLM structured output
 - **Icons**: Lucide React (`lucide-react`)
 
 ## Architecture
 
-The app is a React SPA deployed to Cloudflare as a Worker with static assets. A Cloudflare Worker (defined in `worker/index.ts`) acts as a reverse proxy between the browser and the Vercel AI Gateway:
+The app is a React SPA deployed to Cloudflare as a Worker with static assets. A Cloudflare Worker (defined in `worker/index.ts`) acts as a reverse proxy between the browser and OpenRouter:
 
 1. **Browser** makes requests to `/api/ai/chat/completions` (same origin)
-2. **Cloudflare Worker** validates the request origin, injects the `AI_GATEWAY_API_KEY` secret, and forwards to `https://ai-gateway.vercel.sh/v1/chat/completions`
-3. **AI Gateway** routes to the configured model (`google/gemini-3-flash-preview`)
+2. **Cloudflare Worker** validates the request origin, injects the `OPENROUTER_API_KEY` secret, and forwards to `https://openrouter.ai/api/v1/chat/completions`
+3. **OpenRouter** routes Director decisions to `openai/gpt-6-luna` and storytelling to `meta/muse-glimmer-30b`
 
 This keeps the API key out of client code entirely. The worker enforces strict origin checks (Origin header, Referer header, Sec-Fetch-Site header) and CORS policy, only allowing requests from `localhost:5173` (dev) and `unwritten.land` (prod).
 
@@ -59,7 +59,7 @@ This keeps the API key out of client code entirely. The worker enforces strict o
 
 ```
 worker/
-  index.ts                 # Cloudflare Worker — AI Gateway proxy with auth & CORS
+  index.ts                 # Cloudflare Worker — OpenRouter proxy with auth & CORS
 src/
   App.tsx                  # Root component — phase-based routing via switch
   main.tsx                 # React entry point, wraps App in GameProvider
@@ -155,12 +155,12 @@ The project uses project references (`tsconfig.json` references `tsconfig.app.js
 
 ### LLM Integration Patterns
 
-- `createModel()` returns a configured AI model instance via `@ai-sdk/openai-compatible`, pointing at the local `/api/ai` proxy.
+- `createModel(role)` returns a configured AI model instance via `@ai-sdk/openai-compatible`, pointing at the local `/api/ai` proxy. Use `"director"` for mechanical decisions and `"storytelling"` for theme, world, narration, sacred time, consequence prose, and epilogue generation.
 - Non-streaming calls use `generateText` + `Output.object({ schema })`.
 - Streaming calls use `streamText` + `Output.object({ schema })` and return a `StreamHandle<T>` with `partialStream`, `finalOutput`, and `abort`.
 - Wrap `result.output` (which is `PromiseLike`) with `Promise.resolve()` when assigning to `StreamHandle.finalOutput`.
 - System prompts and user prompts are built by separate functions in `prompts.ts`.
-- The model ID uses AI Gateway format: `google/gemini-3-flash-preview`.
+- Model IDs use OpenRouter format: `openai/gpt-6-luna` and `meta/muse-glimmer-30b`. Luna uses provider defaults; Glimmer uses low reasoning effort with the provider's default temperature.
 
 ### Formatting
 
@@ -186,5 +186,5 @@ Uses flat config (`eslint.config.js`) with:
 - Unused parameters must be prefixed with `_` to satisfy `noUnusedParameters`.
 - `streamText().output` returns `PromiseLike<T>`, not `Promise<T>` — wrap with `Promise.resolve()` for `StreamHandle` compatibility.
 - The game uses snake_case for data model fields (matching JSON/LLM conventions) but camelCase for React/TS code.
-- The Cloudflare Worker proxy only allows POST requests to `/api/ai/*`. The `AI_GATEWAY_API_KEY` secret must be configured for the worker to function.
-- In local dev, create `.dev.vars` from `.dev.vars.example` with a valid AI Gateway API key.
+- The Cloudflare Worker proxy only allows POST requests to `/api/ai/*`. The `OPENROUTER_API_KEY` secret must be configured for the worker to function.
+- In local dev, create `.dev.vars` from `.dev.vars.example` with a valid OpenRouter API key.

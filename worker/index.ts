@@ -1,13 +1,13 @@
 // ============================================================
-// Cloudflare Worker — AI Gateway Proxy
+// Cloudflare Worker — OpenRouter Proxy
 // ============================================================
-// Proxies requests from /api/ai/* to the Vercel AI Gateway,
+// Proxies requests from /api/ai/* to OpenRouter,
 // injecting the API key from a secret binding. Enforces strict
 // origin checks and CORS to prevent unauthorized usage.
 // ============================================================
 
 interface Env {
-  AI_GATEWAY_API_KEY: string;
+  OPENROUTER_API_KEY: string;
 }
 
 /** Allowed origins for CORS and request validation. */
@@ -16,8 +16,7 @@ const ALLOWED_ORIGINS = [
   "https://unwritten.land",
 ];
 
-/** The upstream AI Gateway base URL. */
-const GATEWAY_BASE_URL = "https://ai-gateway.vercel.sh/v1";
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 /** Path prefix that triggers the proxy. */
 const API_PREFIX = "/api/ai/";
@@ -100,13 +99,13 @@ export default {
       return new Response("Method Not Allowed", { status: 405 });
     }
 
-    // --- Proxy to AI Gateway ---
+    // --- Proxy to OpenRouter ---
     const upstreamPath = url.pathname.slice(API_PREFIX.length);
-    const upstreamUrl = `${GATEWAY_BASE_URL}/${upstreamPath}`;
+    const upstreamUrl = `${OPENROUTER_BASE_URL}/${upstreamPath}`;
 
     const proxyHeaders = new Headers(request.headers);
     // Inject the API key
-    proxyHeaders.set("Authorization", `Bearer ${env.AI_GATEWAY_API_KEY}`);
+    proxyHeaders.set("Authorization", `Bearer ${env.OPENROUTER_API_KEY}`);
     // Remove browser-specific headers that shouldn't go upstream
     proxyHeaders.delete("Origin");
     proxyHeaders.delete("Referer");
