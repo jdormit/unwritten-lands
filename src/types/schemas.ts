@@ -15,7 +15,7 @@ import { z } from "zod";
 // Theme Generation Schema (pre-worldbuilding diversity seed)
 export const themeSchema = z.object({
   geography: z.string().describe("The physical landscape and terrain — be specific and vivid, e.g. 'wind-scoured volcanic plateau above the cloud line' not just 'mountains'"),
-  cultural_tone: z.string().describe("The cultural flavor and inspiration — blend real-world influences into something original, e.g. 'draws from Andean mountain cultures and Tibetan monasticism' not just 'Asian-inspired'"),
+  cultural_tone: z.string().describe("An original cultural identity described through concrete customs, beliefs, and ways of life, e.g. 'terraced farming clans whose mountain sanctuaries preserve ancestral chants'. Do not name or compare to real-world cultures or history."),
   description: z.string().describe("2-3 evocative sentences painting this world's atmosphere for the player. Written in second person present tense, as if the player is arriving for the first time. Concrete sensory details — sights, sounds, smells. E.g. 'You stand on a wind-scoured plateau where sulfur vents hiss between prayer stones. Below, terraced fields cling to volcanic slopes, tended by monks whose chants echo through the cloud line. The air tastes of ash and incense.'"),
 });
 

@@ -2,11 +2,19 @@ import type { GameState, DirectorOutput, ChoiceResult, NullableResources } from 
 import type { ThemeSeed } from "../types/schemas";
 import { pickSceneSeeds, pickActionSeeds } from "./scene-seeds";
 
+const IMMERSION_RULES = `IMMERSION RULES (apply to every player-facing text field):
+- Treat the fictional world as real. Narration, dialogue, lore, titles, summaries, and action labels must stay entirely in-world. Never refer to "the game", the player, an AI, prompts, UI, turns, scores, or game mechanics. Address "you" as the clan's leader, not as someone playing a game. Describe mechanical effects as tangible changes in the clan's life.
+- Never name or explicitly compare anything to real-world peoples, cultures, nations, places, religions, historical figures, or events. Cultural and literary inspirations are private creative inputs, not facts about this world. Transform them into original customs, beliefs, materials, and imagery; describe those details directly instead of using labels such as "Khazar-style" or "Viking-like".
+- If supplied seeds, lore, or history contain either kind of immersion-breaking language, preserve the underlying fictional meaning but rewrite it in-world rather than repeating it.
+- These rules govern prose, not structured mechanics: keep schema keys, IDs, enums, numeric mechanics, and exact entity-reference strings (such as clan_name and advisor_name used to identify existing clans or advisors) as requested. Rewrite immersion-breaking language in surrounding prose without renaming existing entities.`;
+
 // ============================================================
 // Theme Generation Prompt (pre-worldbuilding diversity seed)
 // ============================================================
 
 export const THEME_GEN_SYSTEM = `You are a theme generator for a mythic narrative strategy game. Your job is to synthesize a set of creative seeds into a single, vivid geographic and cultural theme that a world-builder will use to create a full setting.
+
+${IMMERSION_RULES}
 
 You will be given three seeds: a landscape, a cultural inspiration, and a mythic tone. Your task is to weave these into a coherent theme. The seeds are randomly chosen, so some combinations may seem unusual or contradictory — that is fine. Adapt and reinterpret the seeds freely to make them work together. An unexpected combination is an opportunity for originality, not a problem to solve.
 
@@ -37,6 +45,8 @@ Develop these into a specific, vivid geographic setting and cultural identity. S
 
 export const WORLD_GEN_SYSTEM = `You are a world-builder for a mythic narrative strategy game inspired by King of Dragon Pass.
 
+${IMMERSION_RULES}
+
 Create an original, culturally specific setting that feels like it could have its own oral traditions and mythology. Avoid generic Western European fantasy. Create something original, not a direct copy of any real-world culture.
 
 Requirements:
@@ -66,6 +76,8 @@ The world should feel mythic and culturally specific, with a coherent mythology 
 
 function buildDirectorSystem(state: GameState): string {
   return `You are the Director of a narrative strategy game. You decide WHAT happens structurally. Your output is strict JSON — no prose, no explanation.
+
+${IMMERSION_RULES}
 
 CURRENT GAME STATE:
 - Year: ${state.current_year} of 10
@@ -227,6 +239,8 @@ export function getDirectorActionPrompt(
 function buildNarratorSystem(state: GameState): string {
   return `You are the Narrator of a mythic narrative strategy game. You write the prose the player sees. Your output is strict JSON.
 
+${IMMERSION_RULES}
+
 VOICE AND STYLE:
 - Saga-like but not overwrought. Concrete sensory details. Short paragraphs.
 - Think oral history, campfire storytelling — vivid but economical
@@ -309,6 +323,8 @@ Options to narrate:
 export function getSacredTimeSystemPrompt(state: GameState): string {
   return `You are the narrator of a mythic strategy game. Generate the Sacred Time narrative for the start of a new year.
 
+${IMMERSION_RULES}
+
 WORLD:
 - Setting: ${state.world!.setting.name}
 - Clan: ${state.world!.clan.name} — ${state.world!.clan.backstory}
@@ -360,6 +376,8 @@ export function getEpilogueSystemPrompt(state: GameState): string {
 
   return `You are the saga-keeper. Write the final chapter of this clan's story.
 
+${IMMERSION_RULES}
+
 WORLD:
 - Setting: ${state.world!.setting.name} — ${state.world!.setting.tone}
 - Clan: ${state.world!.clan.name} — ${state.world!.clan.backstory}
@@ -408,6 +426,8 @@ export function getEpiloguePrompt(state: GameState): string {
 
 export function getConsequenceSystemPrompt(state: GameState): string {
   return `You are the Narrator of a mythic narrative strategy game. You are writing the immediate aftermath of a decision the player just made.
+
+${IMMERSION_RULES}
 
 VOICE AND STYLE:
 - Saga-like but not overwrought. Concrete sensory details. Short paragraphs.
