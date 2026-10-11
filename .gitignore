@@ -27,3 +27,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Inspiration corpus source texts
+scripts/inspiration/.cache

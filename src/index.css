@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source not "./llm/inspiration-quotes.json";
+@source not "../scripts/inspiration";
 
 @theme {
   /* Parchment earth-tone palette */

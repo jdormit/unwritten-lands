@@ -8,6 +8,7 @@ import { EventScreen } from "./screens/EventScreen";
 import { ConsequenceScreen } from "./screens/ConsequenceScreen";
 import { ActionSelectionScreen } from "./screens/ActionSelectionScreen";
 import { EpilogueScreen } from "./screens/EpilogueScreen";
+import { clearGenerationRecords } from "./debug/generation-debug";
 
 function App() {
   const { state, dispatch } = useGame();
@@ -20,6 +21,7 @@ function App() {
 
   // Handle new game
   const handleNewGame = useCallback(() => {
+    clearGenerationRecords();
     dispatch({ type: "RESET" });
     dispatch({ type: "SET_PHASE", phase: "world_gen" });
   }, [dispatch]);
@@ -28,6 +30,7 @@ function App() {
   const handleContinue = useCallback(() => {
     const saved = loadGame();
     if (saved) {
+      clearGenerationRecords();
       dispatch({ type: "LOAD_GAME", state: saved });
     }
   }, [dispatch]);

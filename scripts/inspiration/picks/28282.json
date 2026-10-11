@@ -1,0 +1,20 @@
+[
+  {"start": 483, "end": 489, "verse": false, "author": "Anonymous (Egyptian)", "translator": "E. A. Wallis Budge"},
+  {"start": 2218, "end": 2226, "verse": false, "author": "Anonymous (Egyptian)", "translator": "E. A. Wallis Budge"},
+  {"start": 5334, "end": 5350, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 5352, "end": 5360, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6192, "end": 6198, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6332, "end": 6339, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6540, "end": 6548, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6571, "end": 6580, "verse": true, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6626, "end": 6635, "verse": true, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6666, "end": 6674, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6698, "end": 6709, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 6762, "end": 6767, "verse": false, "author": "Anonymous (Egyptian)", "translator": "W. M. Flinders Petrie (editor and English rendering)"},
+  {"start": 12300, "end": 12309, "verse": true, "author": "Anonymous (Egyptian)", "translator": "C. W. Goodwin"},
+  {"start": 12464, "end": 12471, "verse": true, "author": "Anonymous (Egyptian)", "translator": "Ludwig Stern"},
+  {"start": 12567, "end": 12580, "verse": true, "author": "Anonymous (Egyptian)", "translator": "C. W. Goodwin"},
+  {"start": 12631, "end": 12641, "verse": true, "author": "Anonymous (Egyptian)", "translator": "C. W. Goodwin"},
+  {"start": 13019, "end": 13039, "verse": true, "author": "Anonymous (Egyptian)", "translator": "P. J. de Horrack"},
+  {"start": 14044, "end": 14052, "verse": true, "author": "Anonymous (Egyptian)", "translator": "P. J. de Horrack"}
+]

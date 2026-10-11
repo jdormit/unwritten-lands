@@ -47,6 +47,11 @@ import {
   MYTHIC_TONE_SEEDS,
   pickRandom,
 } from "./theme-seeds";
+import { withInspiration } from "./inspiration";
+import {
+  beginGeneration, finishGeneration, failGeneration,
+  beginAttempt, completeAttempt, failAttempt,
+} from "../debug/generation-debug";
 
 // ============================================================
 // Schema-aware retry helpers
@@ -91,62 +96,63 @@ ${truncatedJson}
 Generate a corrected response that fixes ALL of the above validation errors while preserving the creative content.`;
 }
 
-/**
- * Generate structured output with schema-aware retry.
- *
- * 1. First attempt uses Output.object({ schema }) for strict validation
- * 2. If validation fails, extracts the raw text and Zod errors from the error
- * 3. Retries with the errors fed back to the model in the prompt
- */
-async function generateWithSchemaRetry<T>(options: {
+interface GenerationOptions<T> {
   model: LanguageModel;
   system: string;
-  prompt: string;
+  prompt: string | Promise<string>;
   schema: ZodType<T>;
   errorLabel: string;
-}): Promise<T> {
-  const { model, system, prompt, schema, errorLabel } = options;
+  state?: GameState;
+  debugRecordId?: number;
+  abortSignal?: AbortSignal;
+}
 
-  // First attempt
+async function generateWithSchemaRetry<T>(options: GenerationOptions<T>): Promise<T> {
+  const prompt = await options.prompt;
+  const id = options.debugRecordId ?? beginGeneration(options.errorLabel, options.system, prompt, options.state);
   try {
-    const result = await generateText({
-      model,
-      system,
-      prompt,
-      output: Output.object({ schema }),
-    });
-    return result.output;
-  } catch (firstError) {
-    // If it's not a schema validation error, just throw
-    if (!NoObjectGeneratedError.isInstance(firstError)) {
-      throw firstError;
-    }
+    const output = await requestWithSchemaRetry({ ...options, prompt, debugRecordId: id });
+    if (options.debugRecordId === undefined) finishGeneration(id, output);
+    return output;
+  } catch (error) {
+    if (options.debugRecordId === undefined) failGeneration(id, error);
+    throw error;
+  }
+}
 
-    const rawText = firstError.text ?? "";
-    const validationErrors = formatZodErrors(firstError.cause);
-    console.warn(
-      `${errorLabel}: schema validation failed, retrying with feedback.\nErrors:\n${validationErrors}`,
-    );
-
-    // Second attempt with error feedback
+async function requestWithSchemaRetry<T>(options: GenerationOptions<T> & { debugRecordId: number }): Promise<T> {
+  const { model, system, schema, errorLabel } = options;
+  let prompt = await options.prompt;
+  const id = options.debugRecordId;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    options.abortSignal?.throwIfAborted();
+    const attemptId = beginAttempt(id, prompt, "nonstream");
     try {
-      const retryResult = await generateText({
+      const result = await generateText({
         model,
         system,
-        prompt: buildRetryPrompt(prompt, rawText, validationErrors),
+        prompt,
         output: Output.object({ schema }),
+        abortSignal: options.abortSignal,
       });
-      return retryResult.output;
-    } catch (retryError) {
-      if (NoObjectGeneratedError.isInstance(retryError)) {
-        const retryValidationErrors = formatZodErrors(retryError.cause);
-        throw new Error(
-          `${errorLabel}: schema validation failed after retry.\nErrors:\n${retryValidationErrors}`,
-        );
+      options.abortSignal?.throwIfAborted();
+      completeAttempt(id, attemptId, result.output);
+      return result.output;
+    } catch (error) {
+      const schemaFailure = NoObjectGeneratedError.isInstance(error);
+      const rawText = schemaFailure ? error.text ?? "" : undefined;
+      const feedback = schemaFailure ? formatZodErrors(error.cause) : undefined;
+      failAttempt(id, attemptId, error, rawText, feedback);
+      options.abortSignal?.throwIfAborted();
+      if (!schemaFailure) throw error;
+      if (attempt === 1) {
+        throw new Error(`${errorLabel}: schema validation failed after retry.\nErrors:\n${feedback}`);
       }
-      throw retryError;
+      console.warn(`${errorLabel}: schema validation failed, retrying with feedback.\nErrors:\n${feedback}`);
+      prompt = buildRetryPrompt(prompt, rawText!, feedback!);
     }
   }
+  throw new Error(`No structured output received from ${errorLabel}`);
 }
 
 // ============================================================
@@ -168,31 +174,69 @@ export interface StreamHandle<T> {
  * Streams partial output for the UI, then validates the final result.
  * If validation fails, falls back to a non-streaming retry with error feedback.
  */
-function streamWithSchemaRetry<T>(options: {
-  model: LanguageModel;
-  system: string;
+function streamWithSchemaRetry<T>(options: GenerationOptions<T> & {
+  prompt: Promise<string>;
+  abortController: AbortController;
+}): StreamHandle<T> {
+  const signal = options.abortController.signal;
+  let onAbort: () => void;
+  const promptReady = new Promise<string>((resolve, reject) => {
+    onAbort = () => reject(signal.reason);
+    if (signal.aborted) onAbort();
+    else signal.addEventListener("abort", onAbort, { once: true });
+    options.prompt.then(resolve, reject);
+  });
+  const started = promptReady
+    .finally(() => signal.removeEventListener("abort", onAbort))
+    .then((prompt) => {
+      signal.throwIfAborted();
+      return startStreamWithSchemaRetry({ ...options, prompt });
+    });
+  return {
+    partialStream: (async function* () {
+      const stream = await started;
+      yield* stream.partialStream;
+    })(),
+    finalOutput: started.then((stream) => stream.finalOutput),
+    abort: () => options.abortController.abort(),
+  };
+}
+
+function startStreamWithSchemaRetry<T>(options: GenerationOptions<T> & {
   prompt: string;
-  schema: ZodType<T>;
-  errorLabel: string;
   abortController: AbortController;
 }): StreamHandle<T> {
   const { model, system, prompt, schema, errorLabel, abortController } = options;
+  const id = beginGeneration(errorLabel, system, prompt, options.state);
+  const attemptId = beginAttempt(id, prompt, "stream");
 
-  const result = streamText({
-    model,
-    system,
-    prompt,
-    output: Output.object({ schema }),
-    abortSignal: abortController.signal,
-  });
+  let result;
+  try {
+    result = streamText({
+      model,
+      system,
+      prompt,
+      output: Output.object({ schema }),
+      abortSignal: abortController.signal,
+    });
+  } catch (error) {
+    failAttempt(id, attemptId, error);
+    failGeneration(id, error);
+    throw error;
+  }
 
   const finalOutput = (async (): Promise<T> => {
     try {
       const output = await result.output;
+      abortController.signal.throwIfAborted();
+      completeAttempt(id, attemptId, output);
       return output as T;
     } catch (firstError) {
-      // If aborted or not a schema error, just throw
-      if (abortController.signal.aborted) throw firstError;
+      const schemaFailure = NoObjectGeneratedError.isInstance(firstError);
+      failAttempt(id, attemptId, firstError,
+        schemaFailure ? firstError.text : undefined,
+        schemaFailure ? formatZodErrors(firstError.cause) : undefined);
+      abortController.signal.throwIfAborted();
       if (!NoObjectGeneratedError.isInstance(firstError)) throw firstError;
 
       const rawText = firstError.text ?? "";
@@ -201,16 +245,23 @@ function streamWithSchemaRetry<T>(options: {
         `${errorLabel}: stream schema validation failed, retrying with feedback.\nErrors:\n${validationErrors}`,
       );
 
-      // Non-streaming retry with error feedback
       return generateWithSchemaRetry({
         model,
         system,
         prompt: buildRetryPrompt(prompt, rawText, validationErrors),
         schema,
         errorLabel: `${errorLabel} (stream retry)`,
+        debugRecordId: id,
+        abortSignal: abortController.signal,
       });
     }
-  })();
+  })().then((output) => {
+    finishGeneration(id, output);
+    return output;
+  }, (error) => {
+    failGeneration(id, error);
+    throw error;
+  });
 
   return {
     partialStream: result.partialOutputStream as AsyncIterable<DeepPartial<T>>,
@@ -240,7 +291,7 @@ async function generateTheme(): Promise<ThemeSeed> {
   return generateWithSchemaRetry({
     model,
     system: THEME_GEN_SYSTEM,
-    prompt: buildThemeGenPrompt(terrain, culture, mythicTone),
+    prompt: withInspiration(buildThemeGenPrompt(terrain, culture, mythicTone)),
     schema: themeSchema,
     errorLabel: "Theme generation",
   });
@@ -257,7 +308,7 @@ export async function generateWorld(): Promise<WorldGeneration> {
   return generateWithSchemaRetry({
     model,
     system: WORLD_GEN_SYSTEM,
-    prompt: buildWorldGenPrompt(theme),
+    prompt: withInspiration(buildWorldGenPrompt(theme)),
     schema: worldGenerationSchema,
     errorLabel: "World generation",
   });
@@ -275,7 +326,8 @@ export async function generateDirectorEvent(
   return generateWithSchemaRetry({
     model,
     system: getDirectorSystemPrompt(state),
-    prompt: getDirectorEventPrompt(state),
+    state,
+    prompt: withInspiration(getDirectorEventPrompt(state)),
     schema: directorOutputSchema,
     errorLabel: "Director event",
   });
@@ -297,7 +349,8 @@ export async function generateDirectorAction(
   return generateWithSchemaRetry({
     model,
     system: getDirectorSystemPrompt(state),
-    prompt: getDirectorActionPrompt(state, actionType, actionLabel, actionDescription, targetClan),
+    state,
+    prompt: withInspiration(getDirectorActionPrompt(state, actionType, actionLabel, actionDescription, targetClan)),
     schema: directorOutputSchema,
     errorLabel: "Director action",
   });
@@ -317,7 +370,8 @@ export async function generateNarration(
   return generateWithSchemaRetry({
     model,
     system: getNarratorSystemPrompt(state),
-    prompt: getNarratorPrompt(directorOutput, isPlayerAction),
+    state,
+    prompt: withInspiration(getNarratorPrompt(directorOutput, isPlayerAction)),
     schema: narratorOutputSchema,
     errorLabel: "Narrator",
   });
@@ -335,7 +389,8 @@ export async function generateSacredTime(
   return generateWithSchemaRetry({
     model,
     system: getSacredTimeSystemPrompt(state),
-    prompt: getSacredTimePrompt(state),
+    state,
+    prompt: withInspiration(getSacredTimePrompt(state)),
     schema: sacredTimeOutputSchema,
     errorLabel: "Sacred time",
   });
@@ -354,7 +409,8 @@ export async function generateConsequence(
   return generateWithSchemaRetry({
     model,
     system: getConsequenceSystemPrompt(state),
-    prompt: getConsequencePrompt(choiceResult),
+    state,
+    prompt: withInspiration(getConsequencePrompt(choiceResult)),
     schema: consequenceOutputSchema,
     errorLabel: "Consequence",
   });
@@ -372,7 +428,8 @@ export async function generateEpilogue(
   return generateWithSchemaRetry({
     model,
     system: getEpilogueSystemPrompt(state),
-    prompt: getEpiloguePrompt(state),
+    state,
+    prompt: withInspiration(getEpiloguePrompt(state)),
     schema: epilogueOutputSchema,
     errorLabel: "Epilogue",
   });
@@ -396,7 +453,7 @@ export async function generateThemeWithSeeds(): Promise<{
   const theme = await generateWithSchemaRetry({
     model,
     system: THEME_GEN_SYSTEM,
-    prompt: buildThemeGenPrompt(seeds.terrain, seeds.culture, seeds.mythicTone),
+    prompt: withInspiration(buildThemeGenPrompt(seeds.terrain, seeds.culture, seeds.mythicTone)),
     schema: themeSchema,
     errorLabel: "Theme generation (with seeds)",
   });
@@ -413,7 +470,7 @@ export function streamWorldGeneration(
   return streamWithSchemaRetry({
     model: createModel("storytelling"),
     system: WORLD_GEN_SYSTEM,
-    prompt: buildWorldGenPrompt(theme),
+    prompt: withInspiration(buildWorldGenPrompt(theme)),
     schema: worldGenerationSchema,
     errorLabel: "World generation (stream)",
     abortController: new AbortController(),
@@ -431,7 +488,8 @@ export function streamNarration(
   return streamWithSchemaRetry({
     model: createModel("storytelling"),
     system: getNarratorSystemPrompt(state),
-    prompt: getNarratorPrompt(directorOutput, isPlayerAction),
+    state,
+    prompt: withInspiration(getNarratorPrompt(directorOutput, isPlayerAction)),
     schema: narratorOutputSchema,
     errorLabel: "Narrator (stream)",
     abortController: new AbortController(),
@@ -447,7 +505,8 @@ export function streamSacredTime(
   return streamWithSchemaRetry({
     model: createModel("storytelling"),
     system: getSacredTimeSystemPrompt(state),
-    prompt: getSacredTimePrompt(state),
+    state,
+    prompt: withInspiration(getSacredTimePrompt(state)),
     schema: sacredTimeOutputSchema,
     errorLabel: "Sacred time (stream)",
     abortController: new AbortController(),
@@ -464,7 +523,8 @@ export function streamConsequence(
   return streamWithSchemaRetry({
     model: createModel("storytelling"),
     system: getConsequenceSystemPrompt(state),
-    prompt: getConsequencePrompt(choiceResult),
+    state,
+    prompt: withInspiration(getConsequencePrompt(choiceResult)),
     schema: consequenceOutputSchema,
     errorLabel: "Consequence (stream)",
     abortController: new AbortController(),
@@ -480,7 +540,8 @@ export function streamEpilogue(
   return streamWithSchemaRetry({
     model: createModel("storytelling"),
     system: getEpilogueSystemPrompt(state),
-    prompt: getEpiloguePrompt(state),
+    state,
+    prompt: withInspiration(getEpiloguePrompt(state)),
     schema: epilogueOutputSchema,
     errorLabel: "Epilogue (stream)",
     abortController: new AbortController(),

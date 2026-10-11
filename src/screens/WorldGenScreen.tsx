@@ -10,7 +10,8 @@ import type { WorldGeneration, SacredTimeOutput, GameState } from "../types/game
 import { useGame } from "../state/game-context";
 import { INITIAL_RESOURCES, initialGameState } from "../state/game-reducer";
 import { LoadingState } from "../components/LoadingState";
-import { getRelationshipDisplay } from "../components/WorldSidebar";
+import { GenerationDebug } from "../components/GenerationDebug";
+import { getRelationshipDisplay } from "../components/relationship-display";
 
 export function WorldGenScreen() {
   const { dispatch } = useGame();
@@ -101,7 +102,7 @@ export function WorldGenScreen() {
         setError(e instanceof Error ? e.message : "World generation failed");
       }
     }
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     if (generationTriggered.current) return;
@@ -132,6 +133,7 @@ export function WorldGenScreen() {
         <div className="text-center space-y-4 max-w-md">
           <p className="text-blood text-lg">The world refuses to take shape.</p>
           <p className="text-parchment-600 text-sm">{error}</p>
+          <GenerationDebug />
           <button
             onClick={() => {
               setError(null);
@@ -156,6 +158,7 @@ export function WorldGenScreen() {
             The World Takes Shape
           </h2>
           <LoadingState message="The gods carve the land from chaos..." />
+          <GenerationDebug />
         </div>
       </div>
     );
@@ -169,6 +172,7 @@ export function WorldGenScreen() {
   return (
     <div className="min-h-dvh flex flex-col px-4 py-8">
       <div className="w-full max-w-2xl mx-auto space-y-6">
+        <GenerationDebug />
         {/* Title */}
         <h2 className="text-3xl font-bold text-parchment-900 text-center">
           The World Takes Shape

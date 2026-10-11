@@ -1,0 +1,17 @@
+[
+  {"start": 393, "end": 400, "verse": false},
+  {"start": 428, "end": 436, "verse": true},
+  {"start": 559, "end": 573, "verse": false, "author": "Anthony Raftery"},
+  {"start": 587, "end": 594, "verse": false, "author": "Anthony Raftery"},
+  {"start": 621, "end": 635, "verse": false, "author": "Anthony Raftery"},
+  {"start": 782, "end": 790, "verse": true},
+  {"start": 870, "end": 894, "verse": true, "author": "Douglas Hyde (An Craoibhin)"},
+  {"start": 1099, "end": 1111, "verse": false},
+  {"start": 1157, "end": 1174, "verse": false},
+  {"start": 1217, "end": 1229, "verse": false},
+  {"start": 1252, "end": 1267, "verse": false},
+  {"start": 1301, "end": 1317, "verse": false},
+  {"start": 1334, "end": 1347, "verse": false},
+  {"start": 1582, "end": 1591, "verse": false},
+  {"start": 1645, "end": 1660, "verse": false}
+]

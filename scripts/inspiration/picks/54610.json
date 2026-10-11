@@ -1,0 +1,14 @@
+[
+  {"start": 510, "end": 524, "verse": true},
+  {"start": 866, "end": 877, "verse": true},
+  {"start": 915, "end": 923, "verse": false},
+  {"start": 1201, "end": 1209, "verse": false},
+  {"start": 1421, "end": 1436, "verse": false},
+  {"start": 1869, "end": 1881, "verse": true},
+  {"start": 2067, "end": 2079, "verse": false},
+  {"start": 2203, "end": 2211, "verse": false},
+  {"start": 2668, "end": 2677, "verse": true},
+  {"start": 3021, "end": 3034, "verse": false},
+  {"start": 3511, "end": 3525, "verse": true},
+  {"start": 3659, "end": 3674, "verse": true}
+]

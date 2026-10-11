@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import type { DeepPartial } from "ai";
 import { streamEpilogue } from "../llm/calls";
 import { useGame } from "../state/game-context";
+import { clearGenerationRecords } from "../debug/generation-debug";
+import { GenerationDebug } from "../components/GenerationDebug";
 import { LoadingState } from "../components/LoadingState";
 import { EventNarrative } from "../components/EventNarrative";
 import { deleteSave } from "../persistence/save";
@@ -91,6 +93,7 @@ export function EpilogueScreen({ isCollapse }: EpilogueScreenProps) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleNewGame() {
+    clearGenerationRecords();
     deleteSave();
     dispatch({ type: "RESET" });
   }
@@ -101,6 +104,7 @@ export function EpilogueScreen({ isCollapse }: EpilogueScreenProps) {
         <div className="text-center space-y-4 max-w-md">
           <p className="text-blood text-lg">The saga-keeper's voice falters.</p>
           <p className="text-parchment-600 text-sm">{error}</p>
+          <GenerationDebug />
           <button
             onClick={() => {
               setError(null);
@@ -131,6 +135,7 @@ export function EpilogueScreen({ isCollapse }: EpilogueScreenProps) {
               : "The saga-keepers gather to tell your tale..."
           }
         />
+        <GenerationDebug />
       </div>
     );
   }
@@ -138,6 +143,7 @@ export function EpilogueScreen({ isCollapse }: EpilogueScreenProps) {
   return (
     <div className="min-h-dvh flex flex-col items-center px-4 py-8">
       <div className="w-full max-w-2xl space-y-8">
+        <GenerationDebug />
         {/* Outcome Badge + Title */}
         <div className="text-center space-y-3">
           {epilogue.outcome && (

@@ -1,0 +1,837 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-11",
+  "jurisdiction": "United States",
+  "scope": "Literary source text in the identified Gutenberg editions. No worldwide public-domain determination is made. Contributor introductions, translations and editorial prose are separate works; ancient originals alone do not clear modern translations.",
+  "method": "Retrieved and parsed dcterms:rights from every listed Gutenberg RDF record. Checked catalog pages for disputed credits and cached title pages, prefaces and section credits for dates and attribution. Publication evidence quotes identify print editions, not Gutenberg release dates. A null publication_year means no print publication year was verified, not that the edition is copyrighted. Acceptance where the print date is unknown relies on Gutenberg's explicit U.S. determination, not an independently reconstructed copyright history.",
+  "hash_method": "SHA256 of the exact bytes of scripts/inspiration/.cache/<id>.txt. These are the normalized source files produced by build.ts: decode UTF-8, remove a leading BOM, convert CRLF/CR to LF, remove text through the START marker and from the END marker onward when both markers exist, trim leading/trailing LF characters, append one LF, encode UTF-8. No quote cleaning, line joining or Unicode normalization is applied for these hashes.",
+  "general_evidence": [
+    {
+      "url": "https://www.gutenberg.org/policy/permission.html",
+      "finding": "Gutenberg follows U.S. copyright law; U.S. public domain does not imply public domain elsewhere. It claims no copyright in markup, formatting or spelling modernization. Original copyright notices do not mean protection still exists."
+    },
+    {
+      "url": "https://www.gutenberg.org/help/copyright.html",
+      "finding": "Pre-1978 published works have a maximum 95-year copyright term. As of 2026, works published through 1930 have exhausted that term. More recent works may be public domain under other rules, but their publication date alone does not establish that."
+    }
+  ],
+  "use_decisions": {
+    "public_domain_us_per_gutenberg": "Accept literary text for U.S. use on Gutenberg's explicit public-domain determination. Print dates, when verified, provide additional evidence; no independent renewal/notice search was performed.",
+    "original_text_only": "Accept the original literary text, but exclude the identified later introduction and its notes pending verification of their separate public-domain basis. This is a conservative project restriction, not a finding that Gutenberg's rights statement is false.",
+    "all_editions": "Do not quote ebook production credits, transcriber/preparer commentary or modern editorial additions as if they were the original literature."
+  },
+  "attribution_corrections": [
+    {
+      "ids": [7145],
+      "correction": "Credit E. A. Wallis Budge as author, not merely translator of an anonymous Egyptian work. This ebook is Budge's explanatory study with embedded translations, not a complete ancient Book of the Dead translation.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/7145",
+      "cache_evidence": ".cache/7145.txt:9-27: 'THE BOOK OF THE DEAD. by E. A. Wallis Budge.' followed by Chapter I, 'The Title.'"
+    },
+    {
+      "ids": [28282],
+      "correction": "Epiphanius Wilson is editor and introduction author, not a translator. Credit translations by section: Book of the Dead, E. A. Wallis Budge; Egyptian Tales, edited by W. M. Flinders Petrie; Tell Amarna Tablets, C. R. Conder; other Egyptian texts credit Edouard Naville, Francois Chabas, C. W. Goodwin, Samuel Birch, F. C. Cook, Ludwig Stern, E. L. Lushington and P. J. de Horrack. The anthology includes cuneiform material and should not label every passage anonymous Egyptian literature.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/28282/pg28282.txt",
+      "cache_evidence": ".cache/28282.txt:15-17,343,5256,7191,11135-11143,11404,11608,11925,11980,12197,12402,12792,12930"
+    },
+    {
+      "ids": [10315],
+      "correction": "Identify this as Persian Literature, revised edition, Volume 1 (1909). Authors are Firdausi, Omar Khayyam and Hafiz. Translators are James Atkinson (Shah Nameh), Edward FitzGerald (Rubaiyat) and Herman Bicknell (Divan); Richard J. H. Gottheil wrote the special introduction. The Gulistan is named in the series title but is not included in this volume.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/10315",
+      "cache_evidence": ".cache/10315.txt:1-13; catalog lists the three authors and translators and expressly notes Volume 1 contains Shah Nameh, Rubaiyat and Divan."
+    },
+    {
+      "ids": [45159],
+      "correction": "Credit F. Hadland Davis for the study and selection. Replace undifferentiated 'Various' with Reynold A. Nicholson (Divani Shamsi Tabriz), E. H. Whinfield (Masnavi) and William Hastie (the five Festival of Spring poems named in the preface). Rumi is the original poet, not the author of Davis's introduction or biographical prose.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/45159/pg45159.txt",
+      "cache_evidence": ".cache/45159.txt:3-7,41-61: Davis explicitly identifies Nicholson, Whinfield and the late Rev. Professor Hastie and specifies the five Hastie poems."
+    },
+    {
+      "ids": [54036],
+      "correction": "Zabelle C. Boyajian is compiler, illustrator and principal translator. Also name Alice Stone Blackwell and George M. Green as translators. Use the anthology's first-line index to credit each poem's actual author and translator, rather than blanket 'Various (Armenian)'. The collection also includes English work by John Gower and William Watson and Italian poems by Vittoria Aganoor Pompilj. James Bryce wrote the introduction; Aram Raffi wrote the historical contribution.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/54036/pg54036.txt",
+      "cache_evidence": ".cache/54036.txt:1-18,55-87,7801-7899; index example: 'Unutterable silence here is spread', Raffi, translated by George M. Green (line 7876)."
+    },
+    {
+      "ids": [28932],
+      "correction": "Knud Rasmussen collected the tales; W. J. Alexander Worster edited and rendered them into English. Do not credit both as English translators.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/28932/pg28932.txt",
+      "cache_evidence": ".cache/28932.txt:13-24: 'Collected by Knud Rasmussen', 'Edited and rendered into English by W. Worster'."
+    },
+    {
+      "ids": [66870],
+      "correction": "Distinguish the translation chain: F. Anton von Schiefner translated Tibetan into German; W. R. S. Ralston translated that German into English and wrote the introduction.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/66870/pg66870.txt",
+      "cache_evidence": ".cache/66870.txt:5-13 explicitly distinguishes 'translated from the Tibetan' from 'done into English from the German'."
+    },
+    {
+      "ids": [7164, 6524],
+      "correction": "Rabindranath Tagore is both author and English translator. The translator fields should not be null. W. B. Yeats wrote Gitanjali's introduction; Willy Pogany supplied Stray Birds' frontispiece.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/7164/pg7164.txt",
+      "additional_evidence_url": "https://www.gutenberg.org/cache/epub/6524/pg6524.txt",
+      "cache_evidence": ".cache/7164.txt:5-11: 'prose translations made by the author'; .cache/6524.txt:14-23: 'translated from Bengali to English by the author'."
+    },
+    {
+      "ids": [56550],
+      "correction": "Lewis Spence is the author of this study and summary, not the translator of a complete Popol Vuh. Credit Spence as author; do not present his commentary as an anonymous K'iche' original.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/56550",
+      "cache_evidence": ".cache/56550.txt:14-22,40-43: 'By Lewis Spence'; preface says no English translation had yet appeared."
+    },
+    {
+      "ids": [20839, 48342, 44456, 12545, 54610],
+      "correction": "These are authored ethnographic works, not wholly anonymous texts with the named writer solely a translator. Credit Washington Matthews, Frank Hamilton Cushing, Minnie Martin, Fay-Cooper Cole and Wilhelm Dittmer respectively as authors/collectors as appropriate; retain community origins for the embedded traditional material. Dittmer's title page says 'Orally collected and pictured'.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/20839.rdf",
+      "additional_evidence_urls": ["https://www.gutenberg.org/ebooks/48342.rdf", "https://www.gutenberg.org/ebooks/44456.rdf", "https://www.gutenberg.org/ebooks/12545.rdf", "https://www.gutenberg.org/ebooks/54610.rdf"],
+      "cache_evidence": "The respective cached title pages name these writers; all five RDF records use dcterms:creator, not trl."
+    },
+    {
+      "ids": [29287, 60165, 54682, 20205, 20299, 40402],
+      "correction": "Preserve traditional origins but distinguish collector/editor/translator prose from the tales. Chamberlain is cataloged as author; Matthews as compiler (title page: collected and translated); Cushing as author (title page: recorded and translated); Brinton as editor; Emerson as author (title page: collected and translated with notes); Busk as editor. A single blanket anonymous-author credit misattributes their introductions and scholarship.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/29287.rdf",
+      "additional_evidence_urls": ["https://www.gutenberg.org/ebooks/60165.rdf", "https://www.gutenberg.org/ebooks/54682.rdf", "https://www.gutenberg.org/ebooks/20205.rdf", "https://www.gutenberg.org/ebooks/20299.rdf", "https://www.gutenberg.org/ebooks/40402.rdf"]
+    },
+    {
+      "ids": [6656],
+      "correction": "The Irish anthology is not wholly anonymous: it includes named poets, and Lady Gregory wrote the introduction and English renderings. Credit original poets at passage level where identified.",
+      "evidence_url": "https://www.gutenberg.org/cache/epub/6656/pg6656.txt",
+      "cache_evidence": ".cache/6656.txt:13-17,56-62 identifies translations by Gregory and quotes Davis's lament."
+    },
+    {
+      "ids": [15879],
+      "correction": "Include The Dream of the Rood in the edition title. Do not label every poem anonymous: Elene is attributed to Cynewulf; the catalog title identifies the full five-poem collection.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/15879",
+      "cache_evidence": ".cache/15879.txt:12-24 gives the full title; the introduction discusses Cynewulf's Elene."
+    },
+    {
+      "ids": [2678, 2679, 22403, 586],
+      "correction": "Record edition editors separately: Mabel Loomis Todd and Thomas Wentworth Higginson for both Dickinson series; Robert Bridges for Hopkins; J. W. Willis Bund for Browne's introduction and notes. Do not attribute their prose to the poets or Browne.",
+      "evidence_url": "https://www.gutenberg.org/ebooks/2678.rdf",
+      "additional_evidence_urls": ["https://www.gutenberg.org/ebooks/2679.rdf", "https://www.gutenberg.org/ebooks/22403.rdf", "https://www.gutenberg.org/cache/epub/586/pg586.txt"],
+      "cache_evidence": ".cache/2678.txt:21-23; .cache/2679.txt:21-23; .cache/22403.txt:19-23; .cache/586.txt:44-46."
+    }
+  ],
+  "editions": [
+    {
+      "id": 981,
+      "title": "Beowulf",
+      "catalog_url": "https://www.gutenberg.org/ebooks/981",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/981.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Cache credits Gummere but supplies no verified print date; RDF identifies Francis Barton Gummere as translator.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "b753263189463ce69b60e6a16ac5e166a2a482089dbd98e722feadcfe5f3a67d"
+    },
+    {
+      "id": 15879,
+      "title": "Elene; Judith; Athelstan; Byrhtnoth; and the Dream of the Rood",
+      "catalog_url": "https://www.gutenberg.org/ebooks/15879",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/15879.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1911,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/15879/pg15879.txt", "cache_lines": "35-52", "quote": "THIRD EDITION. ... GINN & COMPANY ... 1911. ... COPYRIGHT, 1911, BY JAMES M. GARNETT."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "049104936301858fe90ee435493665490a88f1a74c5fa44387e3510f54590d0c"
+    },
+    {
+      "id": 8161,
+      "title": "Fragments of Ancient Poetry",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8161",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8161.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1966,
+      "publication_evidence": {"url": "https://books.google.com/books/about/Fragments_of_Ancient_Poetry_1760.html?id=nAePLoConOcC", "quote": "Issue 122 ... Contributor John J. Dunn ... Publisher William Andrews Clark Memorial Library, University of California, 1966"},
+      "original_publication_year": 1760,
+      "original_publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/8161/pg8161.txt", "cache_lines": "455,535-644", "quote": "By the time of the second edition of the Fragments (also in 1760)"},
+      "notes": "Catalog confirms Augustan Reprint Society publication 122. Cache lines 16-19 credit the society and John J. Dunn's introduction; lines 503-525 cite works through 1962. The 1966 introduction is not cleared by age. Gutenberg labels the whole ebook public domain, but its item-specific notice/renewal or other clearance basis was not verified. Do not infer copyright protection or absence from that date alone. This audit conservatively approves only the original text: fragments begin at line 636. Every current pick in picks/8161.json falls within the fragments (644-1899), so those picks need not be excluded. Exclude Dunn's introduction and its notes (68-529) pending separate verification.",
+      "use_decision": "original_text_only",
+      "allowed_text_ranges": [[636, 1902]],
+      "source_text_sha256": "7a54aec82432062738a5cdfdc7391023db8a5b6b1ec0cc0bcdad306f45014560"
+    },
+    {
+      "id": 6656,
+      "title": "The Kiltartan Poetry Book",
+      "catalog_url": "https://www.gutenberg.org/ebooks/6656",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/6656.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "c4615924a5286c019e2c19621a79966abe9020e7d1e7873e4908e962ff44e668"
+    },
+    {
+      "id": 73533,
+      "title": "The Poetic Edda",
+      "catalog_url": "https://www.gutenberg.org/ebooks/73533",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/73533.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1923,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/73533/pg73533.txt", "cache_lines": "4-21", "quote": "HENRY ADAMS BELLOWS ... TWO VOLUMES IN ONE ... THE AMERICAN-SCANDINAVIAN FOUNDATION ... 1923"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "d63d6de4a8d5274977bdbc81f7d8b082bba080c11e8e59f6e30f346a94ed1545"
+    },
+    {
+      "id": 597,
+      "title": "The Story of Burnt Njal",
+      "catalog_url": "https://www.gutenberg.org/ebooks/597",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/597.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "1995 in the cache describes ebook production, not print publication. Gutenberg catalogs George Webbe Dasent as creator; the saga itself is anonymous.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "439d9438c5c79c40f74506bd05f2ee2a66c1c0f617e767c83a203f34af092d77"
+    },
+    {
+      "id": 17803,
+      "title": "Laxdaela Saga",
+      "catalog_url": "https://www.gutenberg.org/ebooks/17803",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/17803.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1899,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/17803/pg17803.txt", "cache_lines": "18-32", "quote": "MURIEL A.C. PRESS ... MDCCCXCIX ... J.M. DENT AND CO."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "a715316d5eea498eef3af187cbf7ba522070a2c9d76bc02ea12a7922ea6069e0"
+    },
+    {
+      "id": 5186,
+      "title": "Kalevala",
+      "catalog_url": "https://www.gutenberg.org/ebooks/5186",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/5186.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1888,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/5186/pg5186.txt", "cache_lines": "5-12", "quote": "INTO ENGLISH ... JOHN MARTIN CRAWFORD ... [1888]"},
+      "notes": "Year is supplied in brackets by the ebook, not reproduced as an unbracketed print imprint.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "145e6022190f83e66ede384b105a3c4f3c15d798a173cfa043bb24034d91092a"
+    },
+    {
+      "id": 18328,
+      "title": "The Story of Sigurd the Volsung and the Fall of the Niblungs",
+      "catalog_url": "https://www.gutenberg.org/ebooks/18328",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/18328.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1904,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/18328/pg18328.txt", "cache_lines": "17-26", "quote": "BY WILLIAM MORRIS ... EIGHTH IMPRESSION ... LONGMANS, GREEN, AND CO. ... 1904"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "73f989b8031d1d156e8efa783a45da86584aa361e29a88f04fa3c74bbf3e0f6f"
+    },
+    {
+      "id": 5160,
+      "title": "The Mabinogion",
+      "catalog_url": "https://www.gutenberg.org/ebooks/5160",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/5160.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Cache credits Lady Charlotte Guest. RDF's Lady Charlotte Schreiber is the same translator under her later married name, not an attribution error.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "67c33691b3ce58fb3f4a23b86b4c65401fdb12ba25680e3902195de9c8ba4e77"
+    },
+    {
+      "id": 14465,
+      "title": "Gods and Fighting Men",
+      "catalog_url": "https://www.gutenberg.org/ebooks/14465",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/14465.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1905,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/14465/pg14465.txt", "cache_lines": "6-10", "quote": "ARRANGED AND PUT INTO ENGLISH BY LADY GREGORY. WITH A PREFACE BY W.B. YEATS ... 1905"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "d02bdc15fc2103cc1a0382ae7c872ce4aac77ce4ebef173d7ad7a88607509c16"
+    },
+    {
+      "id": 18070,
+      "title": "Poets and Dreamers",
+      "catalog_url": "https://www.gutenberg.org/ebooks/18070",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/18070.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1903,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/18070/pg18070.txt", "cache_lines": "13-21", "quote": "STUDIES & TRANSLATIONS FROM THE IRISH, BY LADY GREGORY. ... CHARLES SCRIBNER'S SONS. 1903."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "7009365cd8b5e85b1185b4cee963cf60827b2959e680bc2892fc9ff44e6dbeee"
+    },
+    {
+      "id": 348,
+      "title": "Hesiod, the Homeric Hymns, and Homerica",
+      "catalog_url": "https://www.gutenberg.org/ebooks/348",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/348.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_preface": {"year": 1914, "url": "https://www.gutenberg.org/cache/epub/348/pg348.txt", "cache_lines": "194-196", "quote": "Hugh G. Evelyn-White ... Sept. 9th, 1914."},
+      "notes": "A preface date is not proof of this print edition's publication year. Cache lines 148-152 distinguish Douglas B. Killings's added endnotes, marked DBK, from Evelyn-White's original notes; exclude these modern additions from literary quotations.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "allowed_text_ranges": [[1489, 9130]],
+      "source_text_sha256": "ecf19586a5734f6fe27dabc78dc75c49c279ed2964d971d8f7a86c8f379bcea2"
+    },
+    {
+      "id": 232,
+      "title": "The Georgics",
+      "catalog_url": "https://www.gutenberg.org/ebooks/232",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/232.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "29 BC at the beginning is the ancient work's date, not James Rhoades's English translation date. RDF confirms Rhoades as translator.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "177e37dfc1613c11c6b7b0414bb12ec723613fad58e344dfafe8113aab2f24e2"
+    },
+    {
+      "id": 1727,
+      "title": "The Odyssey",
+      "catalog_url": "https://www.gutenberg.org/ebooks/1727",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/1727.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "original_publication_year": 1900,
+      "original_publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/1727/pg1727.txt", "cache_lines": "268-283", "quote": "Butler's Translation of the Odyssey appeared originally in 1900 ... the new editions are faithful reprints of the original editions"},
+      "notes": "Cache includes Henry Festing Jones's second-edition preface; 1900 verifies the translation's original publication, not the date of the later edition transcribed.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "83b5ab26a6c80445db52fd5bc64ba0679041a7b54edc4155a4b42e858b5462d1"
+    },
+    {
+      "id": 2199,
+      "title": "The Iliad",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2199",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2199.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "cd05dd9cd944a235f5772c67707f69ea42f0514e445204c33df8357cf74ed65b"
+    },
+    {
+      "id": 7145,
+      "title": "The Book of the Dead",
+      "catalog_url": "https://www.gutenberg.org/ebooks/7145",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/7145.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Budge's authored study, not an anonymous original; no print year verified in the cache or catalog.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "10e4067f78ab0546575a63313604c4669e5d4f12eb2a0c880af6f39bd8ef461d"
+    },
+    {
+      "id": 28282,
+      "title": "Egyptian Literature",
+      "catalog_url": "https://www.gutenberg.org/ebooks/28282",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/28282.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1901,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/28282/pg28282.txt", "cache_lines": "15-25", "quote": "Edited And With A Special Introduction By Epiphanius Wilson ... Copyright, 1901 The Colonial Press", "kind": "copyright year; print imprint does not separately state a publication year"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "c93342d349717600d42e6122be30ee08197bb02857adef153218fb6a243d296e"
+    },
+    {
+      "id": 8018,
+      "title": "The Bible, King James version, Book 18: Job",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8018",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8018.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Specific print edition not identified. 1992 and 2002 in the cache are electronic production dates. KJV is a version designation, not a translator's personal name; U.S. determination does not settle British Crown rights.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "bdfd653e1169b5a5f35a56a687b59cca9823035005996725ee7a8bf14a6270a5"
+    },
+    {
+      "id": 8021,
+      "title": "The Bible, King James version, Book 21: Ecclesiastes",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8021",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8021.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Specific print edition not identified; electronic production dates are not print publication evidence.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "dbf5409bcf35df6882c2ad5e201b5778f22dcc18d17a80d194141c51c3077b82"
+    },
+    {
+      "id": 8019,
+      "title": "The Bible, King James version, Book 19: Psalms",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8019",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8019.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Specific print edition not identified; electronic production dates are not print publication evidence.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "a50ed7aac4eaf902959b5df12d75d4ac9b87acfd45b8b7980f546628b76e9469"
+    },
+    {
+      "id": 1493,
+      "title": "The Legends of the Jews, Volume 1",
+      "catalog_url": "https://www.gutenberg.org/ebooks/1493",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/1493.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_preface": {"year": 1909, "url": "https://www.gutenberg.org/cache/epub/1493/pg1493.txt", "cache_lines": "391", "quote": "NEW YORK, March 24, 1909"},
+      "notes": "Preface date is not substituted for a print publication year. RDF confirms Louis Ginzberg and translator Henrietta Szold.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "d93bd4c36f833bf3f61d5f970ee63b9d5a9b73822aadde4669a844bdc04426b9"
+    },
+    {
+      "id": 10315,
+      "title": "Persian Literature, revised edition, Volume 1",
+      "catalog_url": "https://www.gutenberg.org/ebooks/10315",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/10315.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1909,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/10315/pg10315.txt", "cache_lines": "1-13", "quote": "Revised Edition, Volume 1 ... 1909 ... With a special introduction by RICHARD J. H. GOTTHEIL"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "941324d60c3f54ef6073202f55111063f2bec405bd8e00067b0736349f53a155"
+    },
+    {
+      "id": 45159,
+      "title": "The Persian Mystics: Jalalu'd-din Rumi",
+      "catalog_url": "https://www.gutenberg.org/ebooks/45159",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/45159.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1920,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/45159/pg45159.txt", "cache_lines": "3-17", "quote": "BY F. HADLAND DAVIS ... JOHN MURRAY ... 1920"},
+      "notes": "Preface dated January 22, 1907 is earlier than this 1920 imprint; it is not the date of the edition transcribed.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "05f8ea4f4821258513950e3c837e45d53cd5689ee21bea1e017db6ea93205a65"
+    },
+    {
+      "id": 246,
+      "title": "The Rubaiyat of Omar Khayyam",
+      "catalog_url": "https://www.gutenberg.org/ebooks/246",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/246.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Cache contains FitzGerald's first and fifth versions; no single print edition year verified. Do not assign the first version's date to the entire composite ebook.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "16b96bb2b7b7184286025df2cad564cc12bcc73758730d68c0260b7fbe132238"
+    },
+    {
+      "id": 7164,
+      "title": "Gitanjali",
+      "catalog_url": "https://www.gutenberg.org/ebooks/7164",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/7164.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "591f5a7421d42c588fe6eb94952796396df105dc6f0c1123259b7a7addfd64d7"
+    },
+    {
+      "id": 6524,
+      "title": "Stray Birds",
+      "catalog_url": "https://www.gutenberg.org/ebooks/6524",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/6524.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1916,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/6524/pg6524.txt", "cache_lines": "14-23", "quote": "By Rabindranath Tagore ... translated from Bengali to English by the author ... New York: The Macmillan Company, 1916"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "b1c83bf4b447222ba5c2d23c976e1fbef4b7fcbbc2f651febbaf73991f23d7a4"
+    },
+    {
+      "id": 6519,
+      "title": "Songs of Kabir",
+      "catalog_url": "https://www.gutenberg.org/ebooks/6519",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/6519.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1915,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/6519/pg6519.txt", "cache_lines": "14-20", "quote": "Translated by Rabindranath Tagore ... Introduction by Evelyn Underhill ... New York, The Macmillan Company ... 1915"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "831b292c67e7e5a5730af52d6a5c6de3573e7ad192ad5ea95faa6663ff8647ab"
+    },
+    {
+      "id": 2388,
+      "title": "The Song Celestial (Bhagavad Gita)",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2388",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2388.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1900,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/2388/pg2388.txt", "cache_lines": "22-30", "quote": "Translated from the Sanskrit Text ... Sir Edwin Arnold ... Truslove, Hanson & Comba, Ltd. ... 1900"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "07e5b1107b4c4010c23748c0a31ed9e0b4d35c6622c013f45d9e78efc2ac93b0"
+    },
+    {
+      "id": 2017,
+      "title": "The Dhammapada",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2017",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2017.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Cache identifies Sacred Books of the East, Volume X, Part I, translated by F. Max Muller, but provides no verified print date; introduction, notes and index are omitted.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "7a803da202e84cffc6c3d6d55df433b97221ec1ca1cae8708b0ed954f6a70c72"
+    },
+    {
+      "id": 3283,
+      "title": "The Upanishads",
+      "catalog_url": "https://www.gutenberg.org/ebooks/3283",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/3283.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_preface": {"year": 1919, "url": "https://www.gutenberg.org/cache/epub/3283/pg3283.txt", "cache_lines": "44-47,72-74", "quote": "published in ... The Message of the East, in 1913 and 1914 ... Still further revision ... Editor ... Boston, March, 1919"},
+      "notes": "Serial publication dates and the revised volume's preface date are verified; neither is assigned as the print edition's publication year.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "615c5c4f7ec0fbc5f59af8f21c86086ed9290ea4e3f1fb1ccdb6aa9a095471e1"
+    },
+    {
+      "id": 24869,
+      "title": "The Ramayan of Valmiki",
+      "catalog_url": "https://www.gutenberg.org/ebooks/24869",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/24869.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_year_range": [1870, 1874],
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/24869/pg24869.txt", "cache_lines": "3-15", "quote": "Translated into English Verse ... Ralph T. H. Griffith ... London: Trubner & Co. ... 1870-1874"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "c9076ed1053db0d7530ee278aff5d77072f05237314255854af2a16ae976c0be"
+    },
+    {
+      "id": 66870,
+      "title": "Tibetan Tales, Derived from Indian Sources",
+      "catalog_url": "https://www.gutenberg.org/ebooks/66870",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/66870.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1906,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/66870/pg66870.txt", "cache_lines": "5-20", "quote": "DONE INTO ENGLISH FROM THE GERMAN ... W. R. S. RALSTON ... KEGAN PAUL, TRENCH, TRUBNER & CO. LTD ... 1906."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "7d9c51f8912d4b7c5363e0d66ca0abf8db9761410596caa4803fb783cfb13ab8"
+    },
+    {
+      "id": 216,
+      "title": "The Tao Teh King",
+      "catalog_url": "https://www.gutenberg.org/ebooks/216",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/216.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "0abfd421eccf824a75ac92425fab4aab6d8dbd17f45838d3a2a820d0f70c3457"
+    },
+    {
+      "id": 59709,
+      "title": "Chuang Tzu",
+      "catalog_url": "https://www.gutenberg.org/ebooks/59709",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/59709.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1889,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/59709/pg59709.txt", "cache_lines": "20-34", "quote": "TRANSLATED FROM THE CHINESE ... HERBERT A. GILES ... LONDON BERNARD QUARITCH ... 1889"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "ec67062350d2685103a932d8f0de61a8080a55def1bbfead9ffbecc86179dc59"
+    },
+    {
+      "id": 9394,
+      "title": "The Shih King, or Book of Poetry",
+      "catalog_url": "https://www.gutenberg.org/ebooks/9394",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/9394.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1879,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/9394/pg9394.txt", "cache_lines": "14-26", "quote": "Translated by James Legge ... From the Sacred Books of the East, Vol. 3 ... First Published 1879"},
+      "notes": "The ebook explicitly supplies first-publication date; scanning date in 2000 is unrelated. Cache clarifies Legge's translator role despite RDF using creator.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "62cd83f9e0c26577dc3261512bd713b4bbcb32f4f9671719f38070db9e98b2a5"
+    },
+    {
+      "id": 42290,
+      "title": "A Hundred and Seventy Chinese Poems",
+      "catalog_url": "https://www.gutenberg.org/ebooks/42290",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/42290.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1918,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/42290/pg42290.txt", "cache_lines": "4-11", "quote": "TRANSLATED BY ARTHUR WALEY ... CONSTABLE AND COMPANY LTD. ... 1918"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "3a1ba0980dd04348148deebaec07d5acf67314941973d567e7329a4198e7ffb9"
+    },
+    {
+      "id": 29287,
+      "title": "Aino Folk-Tales",
+      "catalog_url": "https://www.gutenberg.org/ebooks/29287",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/29287.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1888,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/29287/pg29287.txt", "cache_lines": "17-29", "quote": "BY BASIL HALL CHAMBERLAIN. WITH INTRODUCTION BY EDWARD B. TYLOR ... THE FOLK-LORE SOCIETY. 1888."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "0c69a9bd1694fab7764f8d2637d2c02d9f4d474c77c31e0e649e7f49c87161fa"
+    },
+    {
+      "id": 20839,
+      "title": "The Mountain Chant, A Navajo Ceremony",
+      "catalog_url": "https://www.gutenberg.org/ebooks/20839",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/20839.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1887,
+      "publication_evidence": {"url": "https://www.gutenberg.org/ebooks/20839.rdf", "quote": "Fifth Annual Report ... 1883-84, Government Printing Office, Washington, 1887, pages 379-468"},
+      "notes": "1883-84 is the report period; 1887 is its publication year, as stated in the catalog title.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "81193e50903e727c5f320240898361257b2c73c2f4f5254cf0825653607c4235"
+    },
+    {
+      "id": 60165,
+      "title": "Navaho Legends",
+      "catalog_url": "https://www.gutenberg.org/ebooks/60165",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/60165.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1897,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/60165/pg60165.txt", "cache_lines": "3-22,33-36", "quote": "COLLECTED AND TRANSLATED BY WASHINGTON MATTHEWS ... HOUGHTON, MIFFLIN AND COMPANY ... 1897 ... Copyright, 1897"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "a9affc6740fea4071085d437ec3206b10c074dee340ae6cb2245f89ed823679a"
+    },
+    {
+      "id": 54682,
+      "title": "Zuni Folk Tales",
+      "catalog_url": "https://www.gutenberg.org/ebooks/54682",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/54682.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1901,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/54682/pg54682.txt", "cache_lines": "19-40", "quote": "Recorded and Translated by FRANK HAMILTON CUSHING ... G. P. Putnam's Sons ... 1901 ... Copyright, 1901"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "4820ebc3b9721b2c6f3ca66b28e41433dba751d1e40cc3e736f45f44ace4197f"
+    },
+    {
+      "id": 48342,
+      "title": "Outlines of Zuni Creation Myths",
+      "catalog_url": "https://www.gutenberg.org/ebooks/48342",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/48342.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1896,
+      "publication_evidence": {"url": "https://www.gutenberg.org/ebooks/48342.rdf", "quote": "Thirteenth Annual Report ... 1891-1892, Government Printing Office, Washington, 1896, pages 321-448"},
+      "notes": "1891-1892 is the report period, not its publication year.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "25475040802c9d01e63a0fdb5f574498c3e7b4eb48b919fec62289fca7f9a059"
+    },
+    {
+      "id": 56550,
+      "title": "The Popol Vuh: The Mythic and Heroic Sagas of the Kiches of Central America",
+      "catalog_url": "https://www.gutenberg.org/ebooks/56550",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/56550.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1908,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/56550/pg56550.txt", "cache_lines": "20-28", "quote": "By LEWIS SPENCE ... Published by David Nutt ... 1908"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "3e901bf82835a46dd10b146382dace39c74a7570165697c95c1fb55f287384d5"
+    },
+    {
+      "id": 20205,
+      "title": "The Maya Chronicles",
+      "catalog_url": "https://www.gutenberg.org/ebooks/20205",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/20205.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1969,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/20205/pg20205.txt", "cache_lines": "59-71", "quote": "EDITED BY DANIEL G. BRINTON ... Reprinted from the edition of 1882, Philadelphia ... First AMS EDITION published 1969"},
+      "original_publication_year": 1882,
+      "notes": "1969 is a reprint of the explicitly identified 1882 edition. Reprinting does not restart protection for Brinton's text. Unlike #8161, no separately authored modern scholarly introduction is identified; exclude the modern reprint imprint and transcriber commentary from literary quotations.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "729caa2840eb05ef5cc58f4612cc47fd533655c706c10ef64a45aa41bf4d23bf"
+    },
+    {
+      "id": 34655,
+      "title": "Folk Stories from Southern Nigeria, West Africa",
+      "catalog_url": "https://www.gutenberg.org/ebooks/34655",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/34655.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1910,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/34655/pg34655.txt", "cache_lines": "24-48", "quote": "BY ELPHINSTONE DAYRELL ... WITH AN INTRODUCTION BY ANDREW LANG ... LONGMANS, GREEN AND CO. ... 1910"},
+      "notes": "Dayrell is cataloged as author/collector, not solely translator. Lang's introduction needs its own attribution.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "46bf1b47e3e8e8e689df545d79908c6ffc2f16227f81ca7ac8b641424d957f91"
+    },
+    {
+      "id": 44456,
+      "title": "Basutoland: Its Legends and Customs",
+      "catalog_url": "https://www.gutenberg.org/ebooks/44456",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/44456.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1903,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/44456/pg44456.txt", "cache_lines": "1-14", "quote": "BY MINNIE MARTIN ... NICHOLS & CO. ... 1903."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "74aa85e428e3be72b67889373d6579ff1547c61328dbcd6dfe73098b14b6f72b"
+    },
+    {
+      "id": 12545,
+      "title": "Traditions of the Tinguian",
+      "catalog_url": "https://www.gutenberg.org/ebooks/12545",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/12545.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1915,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/12545/pg12545.txt", "cache_lines": "1-12", "quote": "A Study in Philippine Folk-Lore ... By Fay-Cooper Cole ... 1915"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "72da1d139c0512e4231b8af16069b097366208ffa5b5d49a940517ca17f3408d"
+    },
+    {
+      "id": 28932,
+      "title": "Eskimo Folk-Tales",
+      "catalog_url": "https://www.gutenberg.org/ebooks/28932",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/28932.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1921,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/28932/pg28932.txt", "cache_lines": "16-31", "quote": "Collected by Knud Rasmussen ... Edited and rendered into English by W. Worster ... Gyldendal ... 1921"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "9d80236acd91a487d91c0cb975146f051eec204075e21a9b2287cf88c0672d48"
+    },
+    {
+      "id": 54610,
+      "title": "Te Tohunga: The Ancient Legends and Traditions of the Maoris",
+      "catalog_url": "https://www.gutenberg.org/ebooks/54610",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/54610.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1907,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/54610/pg54610.txt", "cache_lines": "27-41", "quote": "ORALLY COLLECTED AND PICTURED BY W. DITTMER ... GEORGE ROUTLEDGE & SONS ... 1907"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "37cf972e6840299cbb07f9d074de30739c751d4b20d029171102e1f545b4a1ec"
+    },
+    {
+      "id": 20299,
+      "title": "Unwritten Literature of Hawaii",
+      "catalog_url": "https://www.gutenberg.org/ebooks/20299",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/20299.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1909,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/20299/pg20299.txt", "cache_lines": "8-26", "quote": "BUREAU OF AMERICAN ETHNOLOGY ... BULLETIN 38 ... COLLECTED AND TRANSLATED ... BY NATHANIEL B. EMERSON ... GOVERNMENT PRINTING OFFICE ... 1909"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "e54fbc6c567e12ac6b51569ac547c89ef867687e515b4c478d55ebcfb3883209"
+    },
+    {
+      "id": 13603,
+      "title": "The Hawaiian Romance of Laieikawai",
+      "catalog_url": "https://www.gutenberg.org/ebooks/13603",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/13603.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_preface": {"year": 1917, "url": "https://www.gutenberg.org/cache/epub/13603/pg13603.txt", "cache_lines": "48-52", "quote": "MARTHA WARREN BECKWITH. COLUMBIA UNIVERSITY, October, 1917."},
+      "notes": "Beckwith wrote the introduction as well as the translation; the preface date is not proof of print publication year.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "7db1635e6f66bb51428e47966d0e43b69962749dd40477fed086f4083f89b2e1"
+    },
+    {
+      "id": 40402,
+      "title": "Sagas from the Far East",
+      "catalog_url": "https://www.gutenberg.org/ebooks/40402",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/40402.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1873,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/40402/pg40402.txt", "cache_lines": "13-18", "quote": "London: Griffith and Farran ... MDCCCLXXIII."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "6518187f10415e88102c903ec9a7bbbc6f3990d9917e41c4d3fd0fc18cd4db79"
+    },
+    {
+      "id": 54036,
+      "title": "Armenian Legends and Poems",
+      "catalog_url": "https://www.gutenberg.org/ebooks/54036",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/54036.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_introduction": {"year": 1916, "url": "https://www.gutenberg.org/cache/epub/54036/pg54036.txt", "cache_lines": "185", "quote": "July 1916."},
+      "bibliographic_evidence": {"url": "https://archive.org/details/armenianlegendsp00boyarich", "quote": "Publication date [pref. 1916]"},
+      "notes": "The available imprint has no year; Internet Archive likewise qualifies its date as [pref. 1916]. Do not convert a dated introduction into an unqualified publication date. Translator credits require the first-line index, not just RDF, which omits these translation roles.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "c49b3f86d0e00eac8067b838d40225df91e7483820bff5aa90f696dc54656933"
+    },
+    {
+      "id": 8395,
+      "title": "The Gods of Pegana",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8395",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8395.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "18774d3616c5a806289b68503f62545e1e850cc995e6889bd71890341040536d"
+    },
+    {
+      "id": 8183,
+      "title": "Time and the Gods",
+      "catalog_url": "https://www.gutenberg.org/ebooks/8183",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/8183.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1906,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/8183/pg8183.txt", "cache_lines": "6-16", "quote": "by Lord Dunsany ... Illustrations by S. H. SIME ... WILLIAM HEINEMANN ... 1906"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "f92b6403f3019fefedd5e47885a2bd9693645382ec8ace27343bf16356742e4a"
+    },
+    {
+      "id": 586,
+      "title": "Religio Medici, Hydriotaphia, and the Letter to a Friend",
+      "catalog_url": "https://www.gutenberg.org/ebooks/586",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/586.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1869,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/586/pg586.txt", "cache_lines": "42-58", "quote": "SIR THOMAS BROWNE ... WITH AN INTRODUCTION AND NOTES BY J. W. WILLIS BUND ... SAMPSON LOW, SON, AND MARSTON ... 1869."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "ea0a6a10e37d708ff892777f7a41ca11ceca37064ac4ced16fbde6609150e2f1"
+    },
+    {
+      "id": 32233,
+      "title": "The Wind Among the Reeds",
+      "catalog_url": "https://www.gutenberg.org/ebooks/32233",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/32233.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1903,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/32233/pg32233.txt", "cache_lines": "26-31", "quote": "WILLIAM BUTLER YEATS ... ELKIN MATHEWS ... MDCCCCIII ... FOURTH EDITION."},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "cfe1ce1dc0e828046daf3f34f07962d83b4eae7b7877b79351f7ea3c18e575f9"
+    },
+    {
+      "id": 2678,
+      "title": "Poems by Emily Dickinson, Series One",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2678",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2678.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "notes": "Early Todd/Higginson text, not a later restored or critical edition; cache lacks a verified print imprint date. Ver.04.29.93 is electronic metadata.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "d8b64745c3abdac10ada5b918f673e7e5095c328dc5d8d02e4e8ccd20daa183c"
+    },
+    {
+      "id": 2679,
+      "title": "Poems by Emily Dickinson, Series Two",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2679",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2679.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "dated_preface": {"year": 1891, "url": "https://www.gutenberg.org/cache/epub/2679/pg2679.txt", "cache_lines": "154", "quote": "August, 1891."},
+      "notes": "Todd/Higginson edition; dated preface does not verify the transcribed print impression's year. Ver.04.29.93 is electronic metadata.",
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "1fc0546d4634548201340f1c11613be4a7a619b6448e9ed05cfcc2de51925e4e"
+    },
+    {
+      "id": 22403,
+      "title": "Poems of Gerard Manley Hopkins",
+      "catalog_url": "https://www.gutenberg.org/ebooks/22403",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/22403.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1918,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/22403/pg22403.txt", "cache_lines": "7,17-23", "quote": "Hopkins, Gerard Manley (1918) Poems ... now first published ... Edited with notes ... ROBERT BRIDGES", "kind": "ebook-supplied bibliographic date"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "8652bdf31d40fa3b9402d416c85eca2fc6017f0dc783c731c55a1ad45d1c65dd"
+    },
+    {
+      "id": 414,
+      "title": "The Pageant of Summer",
+      "catalog_url": "https://www.gutenberg.org/ebooks/414",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/414.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": 1914,
+      "publication_evidence": {"url": "https://www.gutenberg.org/cache/epub/414/pg414.txt", "cache_lines": "1-2,14-16", "quote": "Transcribed from the 1914 Chatto & Windus edition ... LONDON CHATTO & WINDUS 1914"},
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "3fc392cbff7808201b02dfa169b0889d3de856cac6d0104d5c287d57cc4dff96"
+    },
+    {
+      "id": 2317,
+      "title": "The Story of My Heart",
+      "catalog_url": "https://www.gutenberg.org/ebooks/2317",
+      "rights_evidence_url": "https://www.gutenberg.org/ebooks/2317.rdf",
+      "rights_statement": "Public domain in the USA.",
+      "publication_year": null,
+      "publication_evidence": null,
+      "use_decision": "public_domain_us_per_gutenberg",
+      "source_text_sha256": "f77d18a51933dac1ea875b55cbbd22ba53b764a13862989a07d9faca1588becf"
+    }
+  ]
+}

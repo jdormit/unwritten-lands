@@ -1,0 +1,17 @@
+[
+  {"start": 1440, "end": 1461, "verse": true},
+  {"start": 2381, "end": 2387, "verse": false},
+  {"start": 3427, "end": 3434, "verse": false},
+  {"start": 3522, "end": 3535, "verse": false},
+  {"start": 3829, "end": 3839, "verse": false},
+  {"start": 3929, "end": 3942, "verse": false},
+  {"start": 4354, "end": 4368, "verse": false},
+  {"start": 4545, "end": 4559, "verse": false},
+  {"start": 4588, "end": 4599, "verse": false},
+  {"start": 4601, "end": 4607, "verse": false},
+  {"start": 4642, "end": 4651, "verse": false},
+  {"start": 4669, "end": 4675, "verse": false},
+  {"start": 4715, "end": 4723, "verse": false},
+  {"start": 5097, "end": 5107, "verse": false},
+  {"start": 5341, "end": 5346, "verse": false}
+]

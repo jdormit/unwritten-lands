@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useGame } from "../state/game-context";
 import { getAvailableActions } from "../hooks/usePlayerActions";
 import { GameHeader } from "../components/GameHeader";
-import { WorldSidebar, getRelationshipDisplay } from "../components/WorldSidebar";
+import { WorldSidebar } from "../components/WorldSidebar";
+import { getRelationshipDisplay } from "../components/relationship-display";
 import type { PlayerAction } from "../types/game";
 
 interface ActionSelectionScreenProps {

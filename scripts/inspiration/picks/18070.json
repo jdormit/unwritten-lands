@@ -1,0 +1,14 @@
+[
+  {"start": 736, "end": 746, "verse": false, "author": "Anthony Raftery", "translator": "Lady Gregory"},
+  {"start": 830, "end": 844, "verse": false, "author": "Anthony Raftery", "translator": "Lady Gregory"},
+  {"start": 861, "end": 879, "verse": false, "author": "Anthony Raftery", "translator": "Lady Gregory"},
+  {"start": 1027, "end": 1043, "verse": false},
+  {"start": 1377, "end": 1400, "verse": true, "author": "Anonymous (Irish)", "translator": "Lady Gregory"},
+  {"start": 1551, "end": 1565, "verse": false},
+  {"start": 1687, "end": 1699, "verse": false},
+  {"start": 1873, "end": 1896, "verse": false},
+  {"start": 2253, "end": 2281, "verse": true, "author": "Douglas Hyde (An Craoibhin)", "translator": "Lady Gregory"},
+  {"start": 2291, "end": 2309, "verse": true, "author": "Douglas Hyde (An Craoibhin)", "translator": "Lady Gregory"},
+  {"start": 2990, "end": 3004, "verse": true, "author": "Anonymous (Irish)", "translator": "Lady Gregory"},
+  {"start": 3305, "end": 3314, "verse": false}
+]
