@@ -9,8 +9,9 @@ import { ConsequenceScreen } from "./screens/ConsequenceScreen";
 import { ActionSelectionScreen } from "./screens/ActionSelectionScreen";
 import { EpilogueScreen } from "./screens/EpilogueScreen";
 import { clearGenerationRecords } from "./debug/generation-debug";
+import { DebugToggle } from "./components/DebugToggle";
 
-function App() {
+function GameScreens() {
   const { state, dispatch } = useGame();
   const [pendingAction, setPendingAction] = useState<{
     type: string;
@@ -122,6 +123,17 @@ function App() {
     default:
       return null;
   }
+}
+
+function App() {
+  return (
+    <>
+      <div className="pb-[calc(4.25rem+env(safe-area-inset-bottom))]">
+        <GameScreens />
+      </div>
+      <DebugToggle />
+    </>
+  );
 }
 
 export default App;

@@ -86,7 +86,7 @@ export function WorldSidebar({
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-2">
+        <div className="px-5 pt-4 pb-[calc(4.25rem+env(safe-area-inset-bottom))] space-y-2">
           <GenerationDebug />
           {/* Chronicle Section */}
           <SectionHeader

@@ -1,6 +1,8 @@
 # Generation debug
 
-To inspect the actual creative inputs and hidden Director decisions, open the browser console and run:
+Tap the small **Debug** button in the lower-left corner to show or hide debugging information. It is available on every screen, including on phones.
+
+You can also enable it from the browser console:
 
 ```js
 unwrittenDebug.enable()
