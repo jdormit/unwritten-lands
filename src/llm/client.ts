@@ -1,7 +1,7 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { defaultSettingsMiddleware, wrapLanguageModel } from "ai";
 
-const DIRECTOR_MODEL_ID = "meta/muse-glimmer-30b";
+const DIRECTOR_MODEL_ID = "openai/gpt-6-luna";
 const STORYTELLING_MODEL_ID = "meta/muse-glimmer-30b";
 
 /**
