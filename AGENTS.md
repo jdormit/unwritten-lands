@@ -40,7 +40,7 @@ For local development, copy `.dev.vars.example` to `.dev.vars` and fill in the k
 - **Language**: TypeScript 5.9, strict mode
 - **Bundler**: Vite 7 with `@vitejs/plugin-react` and `@cloudflare/vite-plugin`
 - **Styling**: Tailwind CSS v4 (via `@tailwindcss/vite` plugin, `@import "tailwindcss"` in CSS)
-- **AI**: Vercel AI SDK (`ai` package) with `@ai-sdk/openai-compatible` routed through OpenRouter; GPT-6 Luna for Director decisions and Muse Glimmer 30B for storytelling
+- **AI**: Vercel AI SDK (`ai` package) with `@ai-sdk/openai-compatible` routed through OpenRouter; Muse Glimmer 30B for Director decisions and storytelling
 - **API Proxy**: Cloudflare Worker proxies `/api/ai/*` to `https://openrouter.ai/api/v1`, injecting the API key server-side
 - **Validation**: Zod schemas for LLM structured output
 - **Icons**: Lucide React (`lucide-react`)
@@ -51,7 +51,7 @@ The app is a React SPA deployed to Cloudflare as a Worker with static assets. A 
 
 1. **Browser** makes requests to `/api/ai/chat/completions` (same origin)
 2. **Cloudflare Worker** validates the request origin, injects the `OPENROUTER_API_KEY` secret, and forwards to `https://openrouter.ai/api/v1/chat/completions`
-3. **OpenRouter** routes Director decisions to `openai/gpt-6-luna` and storytelling to `meta/muse-glimmer-30b`
+3. **OpenRouter** routes Director decisions and storytelling to `meta/muse-glimmer-30b`
 
 This keeps the API key out of client code entirely. The worker enforces strict origin checks (Origin header, Referer header, Sec-Fetch-Site header) and CORS policy, only allowing requests from `localhost:5173` (dev) and `unwritten.land` (prod).
 
@@ -160,7 +160,7 @@ The project uses project references (`tsconfig.json` references `tsconfig.app.js
 - Streaming calls use `streamText` + `Output.object({ schema })` and return a `StreamHandle<T>` with `partialStream`, `finalOutput`, and `abort`.
 - Wrap `result.output` (which is `PromiseLike`) with `Promise.resolve()` when assigning to `StreamHandle.finalOutput`.
 - System prompts and user prompts are built by separate functions in `prompts.ts`.
-- Model IDs use OpenRouter format: `openai/gpt-6-luna` and `meta/muse-glimmer-30b`. Luna uses provider defaults; Glimmer uses low reasoning effort with the provider's default temperature.
+- Both roles use `meta/muse-glimmer-30b`. Director calls use provider defaults; storytelling uses low reasoning effort with the provider's default temperature.
 
 ### Formatting
 
